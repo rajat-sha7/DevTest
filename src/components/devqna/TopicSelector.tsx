@@ -26,15 +26,15 @@ export function TopicSelector({ currentTopic, onTopicChange }: TopicSelectorProp
             key={topic.id}
             onClick={() => onTopicChange(topic.id as Topic)}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-200",
+              "flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full border transition-all duration-200",
               "hover:shadow-md active:scale-95",
               currentTopic === topic.id
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-white text-muted-foreground border-border hover:border-primary/50"
             )}
           >
-            <Icon className="w-4 h-4" />
-            <span className="font-semibold text-sm">{topic.label}</span>
+            <Icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            <span className="font-semibold text-xs md:text-sm">{topic.label}</span>
           </button>
         );
       })}

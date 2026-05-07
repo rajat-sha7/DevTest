@@ -125,7 +125,7 @@ function DashboardContent() {
         "bg-white border-r border-border transition-all duration-300 ease-in-out flex flex-col shrink-0 z-50 shadow-sm fixed md:relative h-full",
         isSidebarOpen ? "w-full md:w-[380px] opacity-100" : "w-0 overflow-hidden opacity-0"
       )}>
-        <div className="p-6 border-b border-border bg-white/50 backdrop-blur-md sticky top-0 z-10 space-y-6">
+        <div className="p-4 md:p-6 border-b border-border bg-white/50 backdrop-blur-md sticky top-0 z-10 space-y-4 md:space-y-6">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2.5 group">
               <div className="p-2 bg-primary rounded-xl text-primary-foreground shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
@@ -162,13 +162,13 @@ function DashboardContent() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input 
               placeholder="Search concepts..." 
-              className="pl-9 h-11 bg-muted/30 border-transparent focus:border-primary/20 focus:bg-white transition-all rounded-xl"
+              className="pl-9 h-9 md:h-11 text-sm bg-muted/30 border-transparent focus:border-primary/20 focus:bg-white transition-all rounded-xl"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-4 md:space-y-5">
             <TopicSelector 
               currentTopic={currentTopic} 
               onTopicChange={(topic) => {
@@ -190,7 +190,7 @@ function DashboardContent() {
                     variant={difficultyFilter === d ? "default" : "outline"}
                     size="sm"
                     className={cn(
-                      "h-8 px-4 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all",
+                      "h-7 md:h-8 px-3 md:px-4 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-wider transition-all",
                       difficultyFilter === d ? "shadow-md shadow-primary/20" : "bg-muted/30 border-none hover:bg-muted/50"
                     )}
                     onClick={() => setDifficultyFilter(d)}
@@ -206,7 +206,7 @@ function DashboardContent() {
                 <span>Course Progress</span>
                 <span className="text-primary text-xs">{progress}%</span>
               </div>
-              <Progress value={progress} className="h-1.5 bg-muted rounded-full" />
+              <Progress value={progress} className="h-1 md:h-1.5 bg-muted rounded-full" />
             </div>
           </div>
         </div>
