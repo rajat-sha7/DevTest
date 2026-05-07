@@ -1,0 +1,16 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-code",
+      "description": "Abstract technical background with subtle code patterns",
+      "imageUrl": "https://picsum.photos/seed/devqna-hero/1200/800",
+      "imageHint": "technical background"
+    },
+    {
+      "id": "ai-feature",
+      "description": "Visual representation of AI and technical research",
+      "imageUrl": "https://picsum.photos/seed/devqna-ai/800/600",
+      "imageHint": "artificial intelligence"
+    }
+  ]
+}
