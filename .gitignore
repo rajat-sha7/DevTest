@@ -40,6 +40,6 @@ next-env.d.ts
 .genkit/*
 .env*
 
-# firebase
-firebase-debug.log
+# devqna prep
+devqna-debug.log
 firestore-debug.log
