@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, Suspense } from "react";
-import { Topic, Question, Difficulty, NEXTJS_QUESTIONS, REACT_QUESTIONS, JS_QUESTIONS, HTML_CSS_QUESTIONS } from "@/lib/questions";
+import { Topic, Question, Difficulty, NEXTJS_QUESTIONS, REACT_QUESTIONS, JS_QUESTIONS, HTML_CSS_QUESTIONS, REACT_HOOKS_QUESTIONS } from "@/lib/questions";
 import { TopicSelector } from "@/components/devqna/TopicSelector";
 import { QuestionItem } from "@/components/devqna/QuestionItem";
 import { AnswerDisplay } from "@/components/devqna/AnswerDisplay";
@@ -63,6 +63,7 @@ function DashboardContent() {
       case 'react': base = REACT_QUESTIONS; break;
       case 'javascript': base = JS_QUESTIONS; break;
       case 'html-css': base = HTML_CSS_QUESTIONS; break;
+      case 'react-hooks': base = REACT_HOOKS_QUESTIONS; break;
       default: base = NEXTJS_QUESTIONS;
     }
 
@@ -122,6 +123,7 @@ function DashboardContent() {
     const questionsInTopic = currentTopic === 'nextjs' ? NEXTJS_QUESTIONS :
                              currentTopic === 'react' ? REACT_QUESTIONS :
                              currentTopic === 'javascript' ? JS_QUESTIONS :
+                             currentTopic === 'react-hooks' ? REACT_HOOKS_QUESTIONS :
                              HTML_CSS_QUESTIONS;
     
     if (questionsInTopic.length === 0) return 0;

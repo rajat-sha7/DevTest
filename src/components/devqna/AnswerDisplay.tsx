@@ -9,6 +9,8 @@ import { Sparkles, Loader2, BookOpen, Terminal, CheckCircle, Search, ExternalLin
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface AnswerDisplayProps {
   question: Question;
@@ -61,29 +63,6 @@ export function AnswerDisplay({
     question.difficulty === 'Easy' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
     question.difficulty === 'Medium' ? 'bg-amber-50 text-amber-600 border-amber-100' :
     'bg-rose-50 text-rose-600 border-rose-100';
-
-  const formatAnswer = (text: string) => {
-    const lines = text.split('\n');
-    return lines.map((line, i) => {
-      if (line.trim().startsWith('Example')) {
-        const [label, content] = line.split(':');
-        return (
-          <div key={i} className="my-4 md:my-6 p-4 md:p-6 bg-slate-50 border-l-4 border-primary rounded-r-2xl md:rounded-r-3xl relative overflow-hidden group hover:bg-slate-100/80 transition-all duration-300">
-            <div className="absolute top-4 right-4 text-primary/5 group-hover:text-primary/10 transition-colors">
-              <Info className="w-12 h-12" />
-            </div>
-            <strong className="block text-primary text-xs font-bold uppercase tracking-[0.2em] mb-2 font-headline">
-              {label}
-            </strong>
-            <p className="text-slate-700 text-base md:text-lg leading-relaxed font-medium">
-              {content}
-            </p>
-          </div>
-        );
-      }
-      return line.trim() ? <p key={i} className="mb-4 text-slate-600">{line}</p> : null;
-    });
-  };
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -193,7 +172,19 @@ export function AnswerDisplay({
             <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] font-headline">The Expert Breakdown</h2>
           </div>
           <div className="text-lg md:text-xl leading-relaxed text-slate-700 font-medium">
-            {formatAnswer(question.answer)}
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              components={{
+                h3: ({node, ...props}) => <h3 className="text-2xl font-bold text-slate-900 font-headline mt-8 mb-4" {...props} />,
+                p: ({node, ...props}) => <p className="mb-4 text-slate-600" {...props} />,
+                strong: ({node, ...props}) => <strong className="font-bold text-slate-900" {...props} />,
+                ul: ({node, ...props}) => <ul className="list-disc pl-6 mb-4 text-slate-600 space-y-2" {...props} />,
+                ol: ({node, ...props}) => <ol className="list-decimal pl-6 mb-4 text-slate-600 space-y-2" {...props} />,
+                li: ({node, ...props}) => <li {...props} />,
+              }}
+            >
+              {question.answer}
+            </ReactMarkdown>
           </div>
         </section>
 

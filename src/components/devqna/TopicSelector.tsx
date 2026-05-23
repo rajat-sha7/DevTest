@@ -2,7 +2,7 @@
 
 import { Topic, TOPICS } from "@/lib/questions";
 import { cn } from "@/lib/utils";
-import { Zap, Atom, Code2, Layout } from "lucide-react";
+import { Zap, Atom, Code2, Layout, Anchor } from "lucide-react";
 
 interface TopicSelectorProps {
   currentTopic: Topic;
@@ -14,6 +14,7 @@ const iconMap = {
   atom: Atom,
   "code-2": Code2,
   layout: Layout,
+  anchor: Anchor,
 };
 
 export function TopicSelector({ currentTopic, onTopicChange }: TopicSelectorProps) {
