@@ -51,13 +51,13 @@ export default function LandingPage() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative py-20 lg:py-32 overflow-hidden">
+        <section className="relative min-h-screen flex items-center overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-50">
              <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full" />
              <div className="absolute bottom-[10%] right-[-10%] w-[30%] h-[30%] bg-accent/10 blur-[100px] rounded-full" />
           </div>
 
-          <div className="max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-2 gap-16 items-center">
+          <div className="max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-2 gap-16 items-center h-full">
             <div className="space-y-8 text-center lg:text-left">
               <Badge variant="secondary" className="px-4 py-1.5 rounded-full text-primary bg-primary/5 border-primary/10 font-bold uppercase tracking-widest text-[10px]">
                 Expert-Curated Interview Prep
@@ -155,8 +155,8 @@ export default function LandingPage() {
         </section>
 
         {/* Features Grid */}
-        <section id="features" className="py-24 bg-slate-50/50">
-          <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        <section id="features" className="min-h-screen flex items-center justify-center bg-slate-50/50">
+          <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full">
             <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
               <h2 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 font-headline">
                 Everything you need to master your next interview.
@@ -202,8 +202,8 @@ export default function LandingPage() {
         </section>
 
         {/* AI Callout */}
-        <section className="py-24 px-6 md:px-12">
-          <div className="max-w-7xl mx-auto rounded-[4rem] bg-gradient-to-br from-[#295FA3] via-[#1E4B82] to-[#153866] text-primary-foreground overflow-hidden relative shadow-2xl shadow-primary/30">
+        <section className="min-h-screen flex items-center px-6 md:px-12">
+          <div className="max-w-7xl mx-auto rounded-[4rem] bg-gradient-to-br from-[#295FA3] via-[#1E4B82] to-[#153866] text-primary-foreground overflow-hidden relative shadow-2xl shadow-primary/30 w-full">
             {/* Background Decorations */}
             <div className="absolute inset-0 opacity-40 pointer-events-none">
               <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-white blur-[150px] rounded-full" />
@@ -258,8 +258,8 @@ export default function LandingPage() {
         </section>
 
         {/* Footer CTA */}
-        <section className="py-32 text-center">
-          <div className="max-w-4xl mx-auto px-6 space-y-8">
+        <section className="min-h-screen flex items-center justify-center text-center">
+          <div className="max-w-4xl mx-auto px-6 space-y-8 w-full">
             <h2 className="text-4xl lg:text-6xl font-extrabold tracking-tight text-slate-900 font-headline">
               Ready to nail your next interview?
             </h2>
