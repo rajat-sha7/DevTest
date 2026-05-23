@@ -32,6 +32,19 @@ function DashboardContent() {
     }
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const toggleCompleted = (id: string) => {
     const newSet = new Set(completedQuestions);
     if (newSet.has(id)) {

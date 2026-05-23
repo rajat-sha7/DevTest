@@ -66,10 +66,10 @@ console.log(result);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-slate-50 flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-50">
-        <div className="flex items-center gap-4">
+      <header className="min-h-16 py-3 sm:py-0 bg-white border-b border-slate-200 flex flex-col sm:flex-row items-center justify-between px-6 gap-3 sm:gap-4 sticky top-0 z-50">
+        <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto gap-4">
           <Link href="/dashboard" className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
             <ArrowLeft className="w-5 h-5" />
           </Link>
@@ -80,7 +80,7 @@ console.log(result);
             <h1 className="text-lg font-bold text-slate-900 font-headline">JS Playground</h1>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-end w-full sm:w-auto gap-3">
           <Button variant="outline" size="sm" onClick={resetCode} className="rounded-xl font-bold uppercase text-[10px] tracking-widest h-9">
             <RotateCcw className="w-3.5 h-3.5 mr-2" />
             Reset
@@ -92,7 +92,7 @@ console.log(result);
         </div>
       </header>
 
-      <main className="flex-1 p-6 grid lg:grid-cols-2 gap-6 overflow-hidden">
+      <main className="flex-1 p-4 sm:p-6 grid lg:grid-cols-2 gap-6 overflow-y-auto lg:overflow-hidden">
         {/* Editor Pane */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between px-2">
@@ -101,12 +101,12 @@ console.log(result);
               Editor (JavaScript)
             </div>
           </div>
-          <Card className="flex-1 shadow-2xl shadow-slate-200/50 border-none rounded-[2rem] overflow-hidden flex flex-col">
+          <Card className="flex-1 shadow-2xl shadow-slate-200/50 border-none rounded-2xl sm:rounded-[2rem] overflow-hidden flex flex-col">
             <CardContent className="p-0 flex-1">
               <Textarea
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                className="w-full h-full min-h-[500px] p-8 font-code text-[15px] leading-relaxed resize-none border-none focus-visible:ring-0 bg-white"
+                className="w-full h-full min-h-[300px] lg:min-h-[500px] p-4 sm:p-8 font-code text-[14px] sm:text-[15px] leading-relaxed resize-none border-none focus-visible:ring-0 bg-white"
                 placeholder="Write your JS logic here..."
               />
             </CardContent>
@@ -125,7 +125,7 @@ console.log(result);
               Clear
             </Button>
           </div>
-          <Card className="flex-1 bg-[#0D1117] border-none shadow-2xl rounded-[2rem] overflow-hidden flex flex-col ring-1 ring-white/5">
+          <Card className="flex-1 bg-[#0D1117] border-none shadow-2xl rounded-2xl sm:rounded-[2rem] overflow-hidden flex flex-col ring-1 ring-white/5 min-h-[300px] lg:min-h-0">
              <CardHeader className="py-4 px-6 border-b border-white/5 bg-white/5">
                 <div className="flex gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-rose-500/50" />
@@ -133,9 +133,9 @@ console.log(result);
                   <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/50" />
                 </div>
              </CardHeader>
-             <CardContent className="p-6 flex-1 overflow-y-auto custom-scrollbar font-code text-sm">
+             <CardContent className="p-4 sm:p-6 flex-1 overflow-y-auto custom-scrollbar font-code text-sm">
                 {output.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-slate-600 opacity-40 italic">
+                  <div className="h-full flex flex-col items-center justify-center text-slate-600 opacity-40 italic py-12 lg:py-0">
                     <Terminal className="w-8 h-8 mb-2" />
                     <p>Execute code to see output...</p>
                   </div>

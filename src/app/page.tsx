@@ -1,9 +1,10 @@
 
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { GraduationCap, ArrowRight, CheckCircle2, Sparkles, Code2, Layout, Zap, Atom, Terminal, MessageSquareCode, Trophy } from "lucide-react";
+import { GraduationCap, ArrowRight, CheckCircle2, Sparkles, Code2, Layout, Zap, Atom, Terminal, MessageSquareCode, Trophy, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 
 export default function LandingPage() {
   useSmoothScroll();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const heroImage = PlaceHolderImages.find(img => img.id === "hero-code");
   const aiImage = PlaceHolderImages.find(img => img.id === "ai-feature");
 
@@ -24,16 +26,16 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-white overflow-x-hidden">
       {/* Navigation */}
       <nav className="h-16 border-b border-slate-100 sticky top-0 bg-white/80 backdrop-blur-md z-50">
         <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6 lg:px-12">
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <div className="p-1.5 bg-primary rounded-lg text-primary-foreground">
               <GraduationCap className="w-6 h-6" />
             </div>
             <span className="text-xl font-bold tracking-tight text-slate-900 font-headline">DevQnA Prep</span>
-          </div>
+          </Link>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Features</a>
             <Link href="/coding-round" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors flex items-center gap-1.5">
@@ -48,7 +50,57 @@ export default function LandingPage() {
               <Button className="rounded-full px-6 font-bold shadow-lg shadow-primary/20">Get Started</Button>
             </Link>
           </div>
+          {/* Mobile hamburger menu toggle */}
+          <div className="flex md:hidden items-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full hover:bg-slate-100 h-10 w-10 text-slate-700"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle Menu"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </Button>
+          </div>
         </div>
+
+        {/* Mobile Navigation Drawer */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden absolute top-16 left-0 right-0 bg-white/95 backdrop-blur-lg border-b border-slate-100 shadow-xl animate-in slide-in-from-top-5 duration-200 z-50">
+            <div className="flex flex-col p-6 gap-4">
+              <a 
+                href="#features" 
+                className="text-base font-semibold text-slate-700 hover:text-primary transition-colors py-2.5 border-b border-slate-50"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Features
+              </a>
+              <Link 
+                href="/coding-round" 
+                className="text-base font-semibold text-slate-700 hover:text-primary transition-colors flex items-center gap-2.5 py-2.5 border-b border-slate-50"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Trophy className="w-5 h-5 text-amber-500" />
+                Coding Round
+              </Link>
+              <Link 
+                href="/playground" 
+                className="text-base font-semibold text-slate-700 hover:text-primary transition-colors flex items-center gap-2.5 py-2.5 border-b border-slate-50"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Terminal className="w-5 h-5 text-slate-500" />
+                JS Playground
+              </Link>
+              <Link 
+                href="/dashboard"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="w-full pt-2"
+              >
+                <Button className="w-full rounded-full py-6 font-bold shadow-lg shadow-primary/20 text-base">Get Started</Button>
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
 
       <main className="flex-1">
@@ -138,7 +190,7 @@ export default function LandingPage() {
                   ))}
                 </div>
 
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[85%] bg-white/95 backdrop-blur-xl rounded-[1.5rem] p-4 md:p-5 shadow-2xl border border-white/50 space-y-3 animate-pulse-slow z-20">
+                <div className="hidden sm:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[85%] bg-white/95 backdrop-blur-xl rounded-[1.5rem] p-4 md:p-5 shadow-2xl border border-white/50 space-y-3 animate-pulse-slow z-20">
                   <div className="flex items-center gap-2">
                     <MessageSquareCode className="w-4 h-4 text-primary" />
                     <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Technical Deep-Dive</span>
