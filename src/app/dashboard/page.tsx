@@ -13,6 +13,13 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -184,17 +191,7 @@ function DashboardContent() {
             </div>
           </div>
 
-          <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <Input 
-              placeholder="Search concepts..." 
-              className="pl-8 sm:pl-9 h-9 md:h-11 text-sm bg-muted/30 border-transparent focus:border-primary/20 focus:bg-white transition-all rounded-xl"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-3 sm:space-y-4 md:space-y-5">
+          <div className="space-y-3">
             <TopicSelector 
               currentTopic={currentTopic} 
               onTopicChange={(topic) => {
@@ -204,30 +201,29 @@ function DashboardContent() {
               }} 
             />
 
-            <div className="space-y-2 sm:space-y-3">
-              <div className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-[10px] font-bold uppercase text-muted-foreground tracking-widest px-0.5 sm:px-1">
-                <Filter className="w-3 h-3" />
-                Difficulty
-              </div>
-              <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                {difficulties.map((d) => (
-                  <Button
-                    key={d}
-                    variant={difficultyFilter === d ? "default" : "outline"}
-                    size="sm"
-                    className={cn(
-                      "h-7 px-2.5 sm:px-3 md:px-4 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-wider transition-all",
-                      difficultyFilter === d ? "shadow-md shadow-primary/20" : "bg-muted/30 border-none hover:bg-muted/50"
-                    )}
-                    onClick={() => setDifficultyFilter(d)}
-                  >
-                    {d}
-                  </Button>
-                ))}
-              </div>
+            <div className="space-y-1.5">
+              <Select value={difficultyFilter} onValueChange={(val: Difficulty | 'All') => setDifficultyFilter(val)}>
+                <SelectTrigger className="w-full h-10 bg-white border-slate-200 hover:border-primary/50 transition-colors shadow-sm font-semibold rounded-xl text-slate-700">
+                  <div className="flex items-center gap-2.5">
+                    <Filter className="w-4 h-4 text-primary" />
+                    <span>Difficulty: <SelectValue /></span>
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="rounded-xl shadow-xl border-slate-100">
+                  {difficulties.map((d) => (
+                    <SelectItem 
+                      key={d} 
+                      value={d} 
+                      className="cursor-pointer font-medium py-2.5 pl-8 pr-3 focus:bg-primary/5 focus:text-primary transition-colors"
+                    >
+                      {d}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="space-y-2 sm:space-y-2.5 pt-1 sm:pt-2">
+            <div className="space-y-2 pt-1">
               <div className="flex justify-between items-end text-[9px] sm:text-[10px] font-bold uppercase text-muted-foreground tracking-widest px-0.5 sm:px-1">
                 <span>Progress</span>
                 <span className="text-primary text-xs">{progress}%</span>
@@ -265,27 +261,39 @@ function DashboardContent() {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 bg-white relative overflow-x-hidden">
-        <header className="h-14 sm:h-16 border-b border-border flex items-center px-3 sm:px-6 gap-2 sm:gap-4 shrink-0 bg-white/80 backdrop-blur-lg sticky top-0 z-40">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="rounded-full hover:bg-muted h-9 w-9 sm:h-10 sm:w-10 shrink-0"
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          >
-            {isSidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </Button>
+        <header className="h-14 sm:h-16 border-b border-border flex items-center justify-between px-3 sm:px-6 gap-2 sm:gap-4 shrink-0 bg-white/80 backdrop-blur-lg sticky top-0 z-40">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="rounded-full hover:bg-muted h-9 w-9 sm:h-10 sm:w-10 shrink-0"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            >
+              {isSidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </Button>
+            
+            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 overflow-hidden min-w-0">
+               <div className="hidden sm:block p-1.5 bg-muted rounded-lg shrink-0">
+                 <Layers className="w-4 h-4 text-primary" />
+               </div>
+               <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2.5 text-xs md:text-sm text-muted-foreground truncate min-w-0">
+                  <span className="font-medium hidden sm:inline">Curriculum</span>
+                  <span className="opacity-30 hidden sm:inline">/</span>
+                  <span className="font-bold text-foreground uppercase tracking-wider text-[9px] md:text-[10px] shrink-0">{currentTopic}</span>
+                  <span className="opacity-30 hidden lg:inline">/</span>
+                  <span className="truncate font-medium text-slate-500 hidden lg:inline text-xs sm:text-sm">{selectedQuestion?.question || "Select a concept"}</span>
+               </div>
+            </div>
+          </div>
           
-          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 overflow-hidden min-w-0">
-             <div className="hidden sm:block p-1.5 bg-muted rounded-lg shrink-0">
-               <Layers className="w-4 h-4 text-primary" />
-             </div>
-             <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2.5 text-xs md:text-sm text-muted-foreground truncate min-w-0">
-                <span className="font-medium hidden sm:inline">Curriculum</span>
-                <span className="opacity-30 hidden sm:inline">/</span>
-                <span className="font-bold text-foreground uppercase tracking-wider text-[9px] md:text-[10px] shrink-0">{currentTopic}</span>
-                <span className="opacity-30 hidden xs:inline">/</span>
-                <span className="truncate font-medium text-slate-500 hidden xs:inline text-xs sm:text-sm">{selectedQuestion?.question || "Select a concept"}</span>
-             </div>
+          <div className="relative group shrink-0 w-[140px] sm:w-[200px] md:w-[260px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <Input 
+              placeholder="Search concepts..." 
+              className="pl-8 sm:pl-9 h-8 sm:h-9 md:h-10 text-xs sm:text-sm bg-muted/30 border-transparent focus:border-primary/20 focus:bg-white transition-all rounded-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </header>
 
