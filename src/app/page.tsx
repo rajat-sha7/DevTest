@@ -1,379 +1,352 @@
-
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { GraduationCap, ArrowRight, CheckCircle2, Sparkles, Code2, Layout, Zap, Atom, Terminal, MessageSquareCode, Trophy, Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { cn } from "@/lib/utils";
-import { useSmoothScroll } from "@/hooks/useSmoothScroll";
+import { ALL_QUESTIONS, TOPICS, type Question } from "@/lib/questions";
+import { CODING_ROUND_QUESTIONS } from "@/lib/coding-round-questions";
+import { LogoMark } from "@/components/Logo";
+import { Hero3D } from "@/components/landing/hero3d";
+import { FillBar, HeroCarousel, Marquee, Reveal, type HeroItem } from "@/components/landing/motion";
+
+const INK = "#0b1020";
+
+// chips used on dark / white surfaces: solid, vivid, dark text
+const CHIP: Record<string, string> = {
+  nextjs: "bg-white text-slate-900",
+  react: "bg-sky-300 text-slate-900",
+  javascript: "bg-yellow-300 text-slate-900",
+  "html-css": "bg-pink-300 text-slate-900",
+  "react-hooks": "bg-violet-300 text-slate-900",
+};
+
+// whole-card colours for the topic grid
+const CARD: Record<string, { bg: string; text: string; sub: string }> = {
+  nextjs: { bg: "bg-[#0b1020]", text: "text-white", sub: "text-white/75" },
+  react: { bg: "bg-sky-300", text: "text-slate-900", sub: "text-slate-800" },
+  javascript: { bg: "bg-yellow-300", text: "text-slate-900", sub: "text-slate-800" },
+  "html-css": { bg: "bg-pink-300", text: "text-slate-900", sub: "text-slate-800" },
+  "react-hooks": { bg: "bg-violet-300", text: "text-slate-900", sub: "text-slate-800" },
+};
+
+const DIFF: Record<string, string> = {
+  Easy: "bg-emerald-300 text-slate-900",
+  Medium: "bg-amber-300 text-slate-900",
+  Hard: "bg-rose-400 text-slate-900",
+  Expert: "bg-rose-400 text-slate-900",
+};
+
+const BLURB: Record<string, string> = {
+  nextjs: "App Router, rendering modes, caching, middleware, server actions.",
+  react: "Components, state, reconciliation, performance and patterns.",
+  javascript: "Closures, the event loop, promises, prototypes, modern syntax.",
+  "html-css": "Semantic markup, layout, specificity, responsive design, a11y.",
+  "react-hooks": "Every built-in hook, plus the new React 19 ones.",
+};
+
+function summary(md: string, max = 150) {
+  const text = md
+    .replace(/```[\s\S]*?```/g, "")
+    .split("\n")
+    .filter((l) => l.trim() && !l.trim().startsWith("#") && !l.trim().startsWith("-"))
+    .join(" ")
+    .replace(/[*`_>]/g, "")
+    .trim();
+  return text.length > max ? text.slice(0, max).replace(/\s+\S*$/, "") + "…" : text;
+}
+
+const byTopic = (id: string) => ALL_QUESTIONS.filter((q) => q.topic === id);
+const pick = (id: string, i: number): Question => byTopic(id)[i];
+
+const hardShadow = (n = 5) => ({ boxShadow: `${n}px ${n}px 0 ${INK}` });
 
 export default function LandingPage() {
-  useSmoothScroll();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const heroImage = PlaceHolderImages.find(img => img.id === "hero-code");
-  const aiImage = PlaceHolderImages.find(img => img.id === "ai-feature");
-
-  const topics = [
-    { id: 'nextjs', label: 'Next.js', count: 100, icon: Zap, color: 'text-blue-500', bg: 'bg-blue-50', border: 'border-blue-100' },
-    { id: 'react', label: 'React', count: 100, icon: Atom, color: 'text-cyan-500', bg: 'bg-cyan-50', border: 'border-cyan-100' },
-    { id: 'javascript', label: 'JavaScript', count: 100, icon: Code2, color: 'text-amber-500', bg: 'bg-amber-50', border: 'border-amber-100' },
-    { id: 'html-css', label: 'HTML & CSS', count: 100, icon: Layout, color: 'text-indigo-500', bg: 'bg-indigo-50', border: 'border-indigo-100' },
-  ];
+  const total = ALL_QUESTIONS.length;
+  const topics = TOPICS.map((t) => ({ ...t, list: byTopic(t.id) }));
+  const featured = [pick("nextjs", 0), pick("react", 4), pick("javascript", 8), pick("react-hooks", 3)];
+  const heroItems: HeroItem[] = [pick("react-hooks", 3), pick("nextjs", 0), pick("javascript", 8), pick("react", 4)].map((q) => ({
+    id: q.id,
+    topicLabel: TOPICS.find((t) => t.id === q.topic)?.label ?? "",
+    topicChip: CHIP[q.topic],
+    difficulty: q.difficulty,
+    diffChip: DIFF[q.difficulty],
+    question: q.question,
+    summary: summary(q.answer, 200),
+    code: (q.code ?? "").split("\n").slice(0, 8).join("\n"),
+  }));
+  const words = ["Server Components", "Closures", "useEffect", "Event loop", "Suspense", "Flexbox", "Promises", "Caching", "Hydration", "Specificity", "useOptimistic", "Middleware", "Prototypes", "Server Actions", "Reconciliation", "Accessibility"];
+  const rounds = [CODING_ROUND_QUESTIONS[1], CODING_ROUND_QUESTIONS[2], CODING_ROUND_QUESTIONS[5]];
+  const counts = { Easy: 0, Medium: 0, Hard: 0 } as Record<string, number>;
+  ALL_QUESTIONS.forEach((q) => counts[q.difficulty]++);
 
   return (
-    <div className="flex flex-col min-h-screen bg-white overflow-x-hidden">
-      {/* Navigation */}
-      <nav className="h-16 border-b border-slate-100 sticky top-0 bg-white/80 backdrop-blur-md z-50">
-        <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6 lg:px-12">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="p-1.5 bg-primary rounded-lg text-primary-foreground">
-              <GraduationCap className="w-6 h-6" />
+    <div className="min-h-screen bg-[#fff8ec] text-slate-900">
+      {/* ---------- Hero ---------- */}
+      <div
+        className="relative bg-[#2b4bff] text-white"
+        style={{
+          backgroundImage: "radial-gradient(rgb(255 255 255 / .16) 1.3px, transparent 1.3px)",
+          backgroundSize: "26px 26px",
+        }}
+      >
+        <header className="sticky top-0 z-20 bg-[#2b4bff]/95 backdrop-blur border-b-2 border-[#0b1020]">
+          <div className="max-w-6xl mx-auto px-4 sm:px-5 h-16 flex items-center justify-between">
+            <Link href="/" className="font-extrabold text-xl tracking-tight flex items-center gap-2">
+              <LogoMark />
+              DevQnA
+            </Link>
+            <nav className="flex items-center gap-0 sm:gap-2 text-sm sm:text-[15px] font-medium">
+              <a href="#topics" className="px-3 py-2 rounded-lg hover:bg-white/15 hidden md:block">Topics</a>
+              <Link href="/coding-round" className="px-2 sm:px-3 py-2 rounded-lg hover:bg-white/15 whitespace-nowrap">Coding round</Link>
+              <Link href="/playground" className="px-3 py-2 rounded-lg hover:bg-white/15 hidden sm:block">Playground</Link>
+              <details className="relative md:hidden">
+                <summary
+                  aria-label="More links"
+                  className="list-none cursor-pointer w-10 h-10 rounded-lg hover:bg-white/15 flex items-center justify-center text-xl leading-none [&::-webkit-details-marker]:hidden"
+                >
+                  ☰
+                </summary>
+                <div className="absolute right-0 top-12 w-48 rounded-xl bg-white text-[#0b1020] border-2 border-[#0b1020] p-1.5 shadow-[4px_4px_0_#0b1020]">
+                  <a href="#topics" className="block px-3 py-2.5 rounded-lg font-semibold hover:bg-yellow-200">Topics</a>
+                  <Link href="/playground" className="block px-3 py-2.5 rounded-lg font-semibold hover:bg-yellow-200">Playground</Link>
+                  <Link href="/questions-answers" className="block px-3 py-2.5 rounded-lg font-semibold hover:bg-yellow-200">All questions</Link>
+                </div>
+              </details>
+              <Link
+                href="/questions-answers"
+                className="ml-1 px-3 sm:px-4 py-2 rounded-lg bg-yellow-300 whitespace-nowrap text-[#0b1020] font-bold border-2 border-[#0b1020] hover:-translate-y-0.5 transition-transform"
+                style={hardShadow(3)}
+              >
+                Start free
+              </Link>
+            </nav>
+          </div>
+        </header>
+
+        <section className="max-w-6xl mx-auto px-4 sm:px-5 pt-8 pb-14 sm:pt-12 md:pt-16 md:pb-24 grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-12 lg:gap-14 items-center">
+          <div className="min-w-0">
+            <p className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold bg-[#0b1020] text-white rounded-full px-3.5 py-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              Now covers React 19 &amp; Next.js 15
+            </p>
+            <h1 className="mt-5 sm:mt-6 text-[2.5rem] leading-[1.06] sm:text-5xl md:text-6xl font-extrabold leading-[1.04] tracking-tight">
+              Crack the frontend questions you&apos;ll{" "}
+              <span
+                className="inline-block bg-yellow-300 text-[#0b1020] px-3 -rotate-1 border-2 border-[#0b1020]"
+                style={hardShadow(4)}
+              >
+                actually
+              </span>{" "}
+              be asked.
+            </h1>
+            <p className="mt-5 sm:mt-7 text-base sm:text-lg md:text-xl text-blue-50 leading-relaxed max-w-xl">
+              Clear answers and runnable code for Next.js, React, JavaScript and CSS, plus timed coding tasks. Free, no account needed.
+            </p>
+            <div className="mt-7 sm:mt-9 flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <Link
+                href="/questions-answers"
+                className="px-7 py-4 rounded-xl text-center bg-yellow-300 text-[#0b1020] text-base sm:text-lg font-extrabold border-2 border-[#0b1020] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 transition-transform"
+                style={hardShadow(5)}
+              >
+                Start practising →
+              </Link>
+              <Link
+                href="/coding-round"
+                className="px-7 py-4 rounded-xl text-center border-2 border-white text-base sm:text-lg font-bold hover:bg-white hover:text-[#2b4bff] transition-colors"
+              >
+                Try a coding task
+              </Link>
             </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900 font-headline">DevQnA Prep</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Features</a>
-            <Link href="/coding-round" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors flex items-center gap-1.5">
-              <Trophy className="w-4 h-4 text-amber-500" />
-              Coding Round
-            </Link>
-            <Link href="/playground" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors flex items-center gap-1.5">
-              <Terminal className="w-4 h-4" />
-              JS Playground
-            </Link>
-            <Link href="/dashboard">
-              <Button className="rounded-full px-6 font-bold shadow-lg shadow-primary/20">Get Started</Button>
+            <ul className="mt-7 sm:mt-9 flex flex-wrap gap-x-6 gap-y-2 text-sm sm:text-base font-medium text-blue-50">
+              {["Easy to hard", "Runnable code in every answer", "Saves your progress"].map((t) => (
+                <li key={t} className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-yellow-300 text-[#0b1020] text-xs font-black flex items-center justify-center">✓</span>
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <Hero3D>
+            <HeroCarousel items={heroItems} />
+          </Hero3D>
+        </section>
+      </div>
+
+      <Marquee words={words} />
+
+      {/* ---------- Topics ---------- */}
+      <section id="topics">
+        <div className="max-w-6xl mx-auto px-4 sm:px-5 py-14 md:py-20">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">Pick your battle.</h2>
+              <p className="mt-3 text-base sm:text-lg text-slate-700">Every topic runs from easy warm-ups to hard interview questions.</p>
+            </div>
+            <Link href="/questions-answers" className="font-bold underline decoration-4 decoration-yellow-300 underline-offset-4 hover:decoration-[#2b4bff]">
+              Browse everything →
             </Link>
           </div>
-          {/* Mobile hamburger menu toggle */}
-          <div className="flex md:hidden items-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full hover:bg-slate-100 h-10 w-10 text-slate-700"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label="Toggle Menu"
-            >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </Button>
+
+          <div className="mt-8 sm:mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {topics.map((t, idx) => {
+              const c = CARD[t.id];
+              return (
+                <Reveal key={t.id} delay={idx * 80} className="h-full">
+                  <Link
+                    href="/questions-answers"
+                    className={`group flex flex-col h-full rounded-2xl p-5 sm:p-6 border-2 border-[#0b1020] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 ${c.bg} ${c.text}`}
+                    style={hardShadow(5)}
+                  >
+                    <h3 className="text-2xl font-extrabold">{t.label}</h3>
+                    <p className={`mt-2 leading-relaxed ${c.sub}`}>{BLURB[t.id]}</p>
+                    <ul className="mt-5 space-y-2.5 flex-1">
+                      {[0, 3, 7].map((i) => (
+                        <li key={i} className="flex gap-2.5 font-medium leading-snug">
+                          <span className="mt-0.5 shrink-0">→</span>
+                          <span className="line-clamp-2">{t.list[i].question}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <span className="mt-6 font-bold">
+                      Start {t.label}{" "}
+                      <span className="inline-block transition-transform group-hover:translate-x-1.5">→</span>
+                    </span>
+                  </Link>
+                </Reveal>
+              );
+            })}
+
+            <Reveal delay={400} className="h-full">
+              <Link
+                href="/coding-round"
+                className="group flex flex-col h-full rounded-2xl p-5 sm:p-6 border-2 border-[#0b1020] bg-[#2b4bff] text-white transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1"
+                style={hardShadow(5)}
+              >
+                <h3 className="text-2xl font-extrabold">Coding round</h3>
+                <p className="mt-2 text-blue-50 leading-relaxed">Hands-on tasks like the ones in live screening calls.</p>
+                <ul className="mt-5 space-y-2.5 flex-1">
+                  {rounds.map((r) => (
+                    <li key={r.id} className="flex gap-2.5 font-medium leading-snug">
+                      <span className="mt-0.5 shrink-0">→</span>
+                      <span className="line-clamp-2">{r.question}</span>
+                    </li>
+                  ))}
+                </ul>
+                <span className="mt-6 font-bold">
+                  Open coding round{" "}
+                  <span className="inline-block transition-transform group-hover:translate-x-1.5">→</span>
+                </span>
+              </Link>
+            </Reveal>
           </div>
         </div>
+      </section>
 
-        {/* Mobile Navigation Drawer */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-16 left-0 right-0 bg-white/95 backdrop-blur-lg border-b border-slate-100 shadow-xl animate-in slide-in-from-top-5 duration-200 z-50">
-            <div className="flex flex-col p-6 gap-4">
-              <a 
-                href="#features" 
-                className="text-base font-semibold text-slate-700 hover:text-primary transition-colors py-2.5 border-b border-slate-50"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Features
-              </a>
-              <Link 
-                href="/coding-round" 
-                className="text-base font-semibold text-slate-700 hover:text-primary transition-colors flex items-center gap-2.5 py-2.5 border-b border-slate-50"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <Trophy className="w-5 h-5 text-amber-500" />
-                Coding Round
-              </Link>
-              <Link 
-                href="/playground" 
-                className="text-base font-semibold text-slate-700 hover:text-primary transition-colors flex items-center gap-2.5 py-2.5 border-b border-slate-50"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <Terminal className="w-5 h-5 text-slate-500" />
-                JS Playground
-              </Link>
-              <Link 
-                href="/dashboard"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="w-full pt-2"
-              >
-                <Button className="w-full rounded-full py-6 font-bold shadow-lg shadow-primary/20 text-base">Get Started</Button>
-              </Link>
-            </div>
-          </div>
-        )}
-      </nav>
-
-      <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative min-h-[calc(100vh-64px)] flex items-center overflow-hidden transition-all duration-300 will-change-transform py-12 lg:py-0">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-50">
-             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full" />
-             <div className="absolute bottom-[10%] right-[-10%] w-[30%] h-[30%] bg-accent/10 blur-[100px] rounded-full" />
-          </div>
-
-          <div className="max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-[1.15fr_0.85fr] gap-12 lg:gap-16 items-center w-full">
-            <div className="space-y-6 text-center lg:text-left">
-              <Badge variant="secondary" className="px-4 py-1.5 rounded-full text-primary bg-primary/5 border-primary/10 font-bold uppercase tracking-widest text-[10px]">
-                Expert-Curated Interview Prep
-              </Badge>
-              <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-extrabold tracking-tight text-slate-900 font-headline leading-[1.1]">
-                Master the <span className="text-primary">Technical</span> Interview.
-              </h1>
-              <p className="text-base md:text-lg text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                400+ expert questions and answers for Next.js, React, JavaScript, and HTML/CSS. 
-                Built for senior developers who want to stay ahead of the curve.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link href="/dashboard">
-                  <Button size="lg" className="rounded-full px-8 h-12 text-base font-bold shadow-xl shadow-primary/20 hover:scale-105 transition-all">
-                    Start Preparation <ArrowRight className="ml-2 w-5 h-5" />
-                  </Button>
-                </Link>
-                <Link href="/coding-round">
-                  <Button variant="outline" size="lg" className="rounded-full px-8 h-12 text-base font-bold hover:bg-slate-50">
-                    <Trophy className="w-5 h-5 mr-2 text-amber-500" />
-                    Elite Coding Round
-                  </Button>
-                </Link>
-              </div>
-              <div className="flex items-center gap-6 justify-center lg:justify-start pt-2">
-                <div className="flex -space-x-3">
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
-                      <Image src={`https://picsum.photos/seed/user${i}/100/100`} alt="User" width={40} height={40} />
-                    </div>
-                  ))}
-                </div>
-                <p className="text-sm text-slate-500 font-medium">
-                  Joined by <span className="text-slate-900 font-bold">2,000+</span> developers this month
-                </p>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="max-w-md lg:max-w-none mx-auto w-full aspect-square flex items-center justify-center relative rounded-[2rem] bg-slate-100/50 p-4 md:p-6 group overflow-visible">
-                {heroImage && (
-                  <Image 
-                    src={heroImage.imageUrl} 
-                    alt={heroImage.description} 
-                    fill 
-                    className="object-cover opacity-5 pointer-events-none grayscale rounded-[2rem]"
-                    data-ai-hint={heroImage.imageHint}
-                  />
-                )}
-                
-                <div className="grid grid-cols-2 gap-3 md:gap-4 w-full relative z-10">
-                  {topics.map((topic, i) => (
-                    <div 
-                      key={topic.id} 
-                      className={cn(
-                        "rounded-[1.5rem] p-4 md:p-5 border-2 flex flex-col justify-between transition-all duration-500 hover:scale-105 hover:shadow-2xl bg-white shadow-xl relative",
-                        topic.bg, topic.border, topic.color,
-                        i === 0 ? "animate-float-slow" : i === 1 ? "animate-float-delayed" : i === 2 ? "animate-float-slower" : "animate-float"
-                      )}
-                    >
-                      <div className="space-y-3">
-                        <div className={cn("p-2 rounded-xl inline-flex bg-white shadow-sm ring-1 ring-slate-100")}>
-                          <topic.icon className="w-5 h-5" />
-                        </div>
-                        <h3 className="font-extrabold text-slate-900 text-lg md:text-xl leading-tight font-headline">{topic.label}</h3>
-                        <div className="flex items-center gap-2 text-slate-400">
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest leading-none">100 Modules</span>
-                        </div>
-                      </div>
-                      <div className="pt-3 mt-4 border-t border-slate-900/5 flex items-center justify-between">
-                         <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Expert Prep</span>
-                         <ArrowRight className="w-4 h-4 opacity-30 group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="hidden sm:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[85%] bg-white/95 backdrop-blur-xl rounded-[1.5rem] p-4 md:p-5 shadow-2xl border border-white/50 space-y-3 animate-pulse-slow z-20">
-                  <div className="flex items-center gap-2">
-                    <MessageSquareCode className="w-4 h-4 text-primary" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Technical Deep-Dive</span>
+      {/* ---------- Warm-up ---------- */}
+      <section className="border-y-2 border-[#0b1020] bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-5 py-14 md:py-20">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">Warm up with these.</h2>
+          <p className="mt-3 text-base sm:text-lg text-slate-700">Short answer first. Open the full explanation when you want more.</p>
+          <div className="mt-8 sm:mt-10 grid md:grid-cols-2 gap-6">
+            {featured.map((q, idx) => (
+              <Reveal key={q.id} delay={(idx % 2) * 100} className="h-full">
+                <Link
+                  href="/questions-answers"
+                  className="block h-full rounded-2xl p-5 sm:p-6 bg-[#fff8ec] border-2 border-[#0b1020] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1"
+                  style={hardShadow(5)}
+                >
+                  <div className="flex gap-2 text-xs font-bold">
+                    <span className={`px-2.5 py-1 rounded-full border border-[#0b1020] ${CHIP[q.topic]}`}>
+                      {TOPICS.find((t) => t.id === q.topic)?.label}
+                    </span>
+                    <span className={`px-2.5 py-1 rounded-full border border-[#0b1020] ${DIFF[q.difficulty]}`}>{q.difficulty}</span>
                   </div>
-                  <h4 className="text-xs md:text-sm font-bold text-slate-900 leading-relaxed font-headline">
-                    "Explain the difference between Server Components and Client Components in Next.js 15."
-                  </h4>
-                  <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
-                    <Sparkles className="w-3.5 h-3.5 text-accent" />
-                    <span className="text-[10px] font-bold text-accent uppercase tracking-widest">AI Synthesis Result available</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+                  <h3 className="mt-4 text-xl font-bold leading-snug">{q.question}</h3>
+                  <p className="mt-2 text-slate-700 leading-relaxed">{summary(q.answer, 170)}</p>
+                </Link>
+              </Reveal>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Features Grid */}
-        <section id="features" className="py-16 md:py-20 flex items-center justify-center bg-slate-50/50 transition-all duration-300 will-change-transform">
-          <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full">
-            <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
-              <h2 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 font-headline">
-                Everything you need to master your next interview.
-              </h2>
-              <p className="text-base md:text-lg text-slate-500">
-                We've spent hundreds of hours curating the most important concepts and questions so you don't have to.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+      {/* ---------- How it works ---------- */}
+      <section className="bg-[#0b1020] text-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-5 py-14 md:py-20 grid lg:grid-cols-2 gap-12 lg:gap-16">
+          <div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">Three steps.</h2>
+            <ol className="mt-9 space-y-8">
               {[
-                {
-                  title: "100 Questions Per Topic",
-                  description: "Comprehensive coverage from basic fundamentals to expert-level architectural concepts.",
-                  icon: Code2,
-                  color: "bg-blue-500"
-                },
-                {
-                  title: "Elite Coding Rounds",
-                  description: "50 specialized challenges focusing on the most common senior-level Next.js and React interview tasks.",
-                  icon: Trophy,
-                  color: "bg-amber-500"
-                },
-                {
-                  title: "AI-Powered Deep Dives",
-                  description: "Struggling with a concept? Use our integrated AI to get alternative explanations and research paths.",
-                  icon: Sparkles,
-                  color: "bg-accent"
-                }
-              ].map((feature, i) => (
-                <Card key={i} className="p-6 md:p-7 rounded-[1.5rem] border-none shadow-sm hover:shadow-xl transition-all duration-300 group">
-                  <div className={cn("p-3 rounded-xl text-white inline-flex mb-4 group-hover:scale-110 transition-transform", feature.color)}>
-                    <feature.icon className="w-5 h-5" />
+                ["Choose a topic and difficulty", "Start easy to refresh the basics, or jump straight to Hard if your interview is close."],
+                ["Read the answer, then run the code", "Every answer has an example. Open it in the playground and change it."],
+                ["Mark what you know", "Progress is saved in your browser, so you always see what is left."],
+              ].map(([h, b], i) => (
+                <li key={h}>
+                  <Reveal delay={i * 120} className="flex gap-5">
+                    <span className="w-11 h-11 rounded-full bg-yellow-300 text-[#0b1020] text-lg font-black flex items-center justify-center shrink-0">{i + 1}</span>
+                    <div>
+                      <h3 className="text-xl font-bold">{h}</h3>
+                      <p className="mt-1 text-slate-300 leading-relaxed">{b}</p>
+                    </div>
+                  </Reveal>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">Start gentle. Finish sharp.</h2>
+            <div className="mt-9 space-y-6">
+              {(["Easy", "Medium", "Hard"] as const).map((d) => (
+                <div key={d}>
+                  <div className="flex justify-between mb-2">
+                    <span className="font-bold text-lg">{d}</span>
+                    <span className="text-slate-300">
+                      {d === "Easy" ? "Refresh the basics" : d === "Medium" ? "Build confidence" : "Interview-level depth"}
+                    </span>
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-2 font-headline">{feature.title}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">
-                    {feature.description}
-                  </p>
-                </Card>
+                  <FillBar
+                    percent={(counts[d] / total) * 100}
+                    track="bg-white/15"
+                    className={d === "Easy" ? "bg-emerald-400" : d === "Medium" ? "bg-yellow-300" : "bg-pink-400"}
+                  />
+                </div>
               ))}
             </div>
+            <Link
+              href="/playground"
+              className="mt-10 inline-block px-6 py-3.5 rounded-xl border-2 border-white font-bold hover:bg-white hover:text-[#0b1020] transition-colors"
+            >
+              Open the JS playground
+            </Link>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* AI Callout */}
-        <section className="py-16 md:py-20 flex items-center px-6 md:px-12 transition-all duration-300 will-change-transform">
-          <div className="max-w-7xl mx-auto rounded-[2rem] lg:rounded-[2.5rem] bg-gradient-to-br from-[#295FA3] via-[#1E4B82] to-[#153866] text-primary-foreground overflow-hidden relative shadow-2xl shadow-primary/30 w-full">
-            {/* Background Decorations */}
-            <div className="absolute inset-0 opacity-40 pointer-events-none">
-              <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-white blur-[150px] rounded-full" />
-              <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#19A9E6] blur-[120px] rounded-full" />
-            </div>
-
-            <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center p-8 lg:p-14 lg:py-16 lg:px-20 relative z-10">
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <h2 className="text-3xl lg:text-4xl lg:text-[2.75rem] font-extrabold tracking-tight font-headline leading-[1.1]">
-                    Powered by AI. <br />
-                    <span className="text-[#19A9E6]">Driven by Experts.</span>
-                  </h2>
-                  <p className="text-base md:text-lg text-primary-foreground/90 leading-relaxed max-w-xl font-body">
-                    Our static answers are just the beginning. Every question has an "AI Deep-Dive" feature that generates contextual research paths and production-quality examples on demand.
-                  </p>
-                </div>
-                <div className="pt-2">
-                  <Link href="/dashboard">
-                    <Button size="lg" className="rounded-full px-8 h-12 text-base font-bold hover:scale-105 transition-all text-[#295FA3] shadow-xl shadow-black/10 bg-white">
-                      Try AI Deep-Dive Now
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-              
-              <div className="relative group">
-                <div className="relative rounded-[1.5rem] overflow-hidden shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] border border-white/20 aspect-video bg-white/10 backdrop-blur-3xl transition-transform duration-700 hover:scale-[1.02]">
-                  {aiImage && (
-                    <Image 
-                      src={aiImage.imageUrl} 
-                      alt={aiImage.description} 
-                      fill 
-                      className="object-cover opacity-60 mix-blend-overlay"
-                      data-ai-hint={aiImage.imageHint}
-                    />
-                  )}
-                  <div className="absolute inset-4 border border-white/10 rounded-[1.25rem] pointer-events-none" />
-                  <div className="absolute inset-8 border border-white/10 rounded-[1rem] pointer-events-none" />
-                </div>
-                
-                <div className="absolute -top-4 -right-4 bg-white text-[#295FA3] px-5 py-2.5 rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.2)] font-bold text-[10px] uppercase tracking-[0.2em] animate-float z-20 border border-slate-100">
-                  Live Synthesis
-                </div>
-
-                <div className="absolute -bottom-4 -left-4 bg-[#19A9E6] text-white px-5 py-2.5 rounded-xl shadow-[0_8px_20px_rgba(25,169,230,0.3)] font-bold text-[10px] uppercase tracking-[0.2em] animate-float-slow z-20 border border-white/20">
-                  Expert Review
-                </div>
-              </div>
-            </div>
+      {/* ---------- CTA ---------- */}
+      <section className="bg-yellow-300 border-y-2 border-[#0b1020]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-5 py-12 md:py-20 flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div>
+            <h2 className="text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.05]">Interview coming up?</h2>
+            <p className="mt-3 text-lg md:text-xl font-medium">Answer your first question in under a minute.</p>
           </div>
-        </section>
+          <Link
+            href="/questions-answers"
+            className="md:self-auto shrink-0 px-8 py-4 rounded-xl text-center bg-[#0b1020] text-white text-base sm:text-lg font-extrabold hover:-translate-y-1 transition-transform"
+            style={{ boxShadow: "5px 5px 0 #2b4bff" }}
+          >
+            Start practising →
+          </Link>
+        </div>
+      </section>
 
-        {/* Footer CTA */}
-        <section className="py-16 md:py-24 flex items-center justify-center text-center transition-all duration-300 will-change-transform">
-          <div className="max-w-4xl mx-auto px-6 space-y-5 w-full">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 font-headline">
-              Ready to nail your next interview?
-            </h2>
-            <p className="text-base md:text-lg text-slate-500">
-              Join thousands of developers using DevQnA Prep to level up their careers.
-            </p>
-            <div className="pt-2">
-              <Link href="/dashboard">
-                <Button size="lg" className="rounded-full px-8 h-12 text-base font-bold shadow-2xl shadow-primary/30 hover:scale-105 transition-all">
-                  Start Preparation Free
-                </Button>
-              </Link>
-            </div>
+      <footer className="bg-[#0b1020] text-slate-400">
+        <div className="max-w-6xl mx-auto px-4 sm:px-5 py-8 flex flex-col sm:flex-row sm:justify-between gap-3 text-sm">
+          <span>© {new Date().getFullYear()} DevQnA</span>
+          <div className="flex gap-6">
+            <Link href="/questions-answers" className="hover:text-white">Questions</Link>
+            <Link href="/coding-round" className="hover:text-white">Coding round</Link>
+            <Link href="/playground" className="hover:text-white">Playground</Link>
           </div>
-        </section>
-      </main>
-
-      <footer className="py-12 border-t border-slate-100 bg-slate-50/50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex items-center gap-2">
-            <div className="p-1 bg-primary rounded text-primary-foreground">
-              <GraduationCap className="w-4 h-4" />
-            </div>
-            <span className="text-lg font-bold tracking-tight text-slate-900 font-headline">DevQnA Prep</span>
-          </div>
-          <div className="flex gap-8 text-sm text-slate-500 font-medium">
-            <Link href="/coding-round" className="hover:text-primary transition-colors">Coding Round</Link>
-            <Link href="/playground" className="hover:text-primary transition-colors">Playground</Link>
-            <a href="#" className="hover:text-primary transition-colors">Privacy</a>
-            <a href="#" className="hover:text-primary transition-colors">Terms</a>
-          </div>
-          <p className="text-sm text-slate-400">
-            © {new Date().getFullYear()} DevQnA Prep. All rights reserved.
-          </p>
         </div>
       </footer>
-
-      <style jsx global>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-12px); }
-        }
-        @keyframes float-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-18px); }
-        }
-        @keyframes pulse-slow {
-          0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-          50% { opacity: 0.95; transform: translate(-50%, -50%) scale(0.97); }
-        }
-        .animate-float {
-          animation: float 4s ease-in-out infinite;
-        }
-        .animate-float-slow {
-          animation: float-slow 5s ease-in-out infinite;
-        }
-        .animate-pulse-slow {
-          animation: pulse-slow 6s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 }

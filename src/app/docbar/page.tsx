@@ -4,8 +4,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { Code2, Layout, Zap, Atom, GraduationCap, Trophy, Terminal, Menu, X } from "lucide-react";
+import { Code2, Layout, Zap, Atom, Trophy, Terminal, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LogoMark } from "@/components/Logo";
 
 const topics = [
   { id: "react", label: "React", icon: <Atom className="w-8 h-8" /> },
@@ -23,10 +24,8 @@ export default function DocBar() {
       <nav className="h-16 border-b border-slate-100 sticky top-0 bg-white/80 backdrop-blur-md z-50">
         <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6 lg:px-12">
           <Link href="/" className="flex items-center gap-2">
-            <div className="p-1.5 bg-primary rounded-lg text-primary-foreground">
-              <GraduationCap className="w-6 h-6" />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900 font-headline">DevQnA Prep</span>
+            <LogoMark className="w-9 h-9" />
+            <span className="text-xl font-extrabold tracking-tight text-slate-900 font-headline">DevQnA</span>
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <Link href="/#features" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Features</Link>
@@ -38,7 +37,7 @@ export default function DocBar() {
               <Terminal className="w-4 h-4" />
               JS Playground
             </Link>
-            <Link href="/dashboard">
+            <Link href="/questions-answers">
               <Button className="rounded-full px-6 font-bold shadow-lg shadow-primary/20">Get Started</Button>
             </Link>
           </div>
@@ -84,7 +83,7 @@ export default function DocBar() {
                 JS Playground
               </Link>
               <Link 
-                href="/dashboard"
+                href="/questions-answers"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="w-full pt-2"
               >
@@ -142,10 +141,8 @@ export default function DocBar() {
       <footer className="py-12 border-t border-slate-100 bg-slate-50/50">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-2">
-            <div className="p-1 bg-primary rounded text-primary-foreground">
-              <GraduationCap className="w-4 h-4" />
-            </div>
-            <span className="text-lg font-bold tracking-tight text-slate-900 font-headline">DevQnA Prep</span>
+            <LogoMark className="w-7 h-7 text-xs rounded" />
+            <span className="text-lg font-extrabold tracking-tight text-slate-900 font-headline">DevQnA</span>
           </div>
           <div className="flex gap-8 text-sm text-slate-500 font-medium">
             <Link href="/coding-round" className="hover:text-primary transition-colors">Coding Round</Link>
@@ -154,7 +151,7 @@ export default function DocBar() {
             <a href="#" className="hover:text-primary transition-colors">Terms</a>
           </div>
           <p className="text-sm text-slate-400">
-            © {new Date().getFullYear()} DevQnA Prep. All rights reserved.
+            © {new Date().getFullYear()} DevQnA. All rights reserved.
           </p>
         </div>
       </footer>

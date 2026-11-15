@@ -43,3 +43,5 @@ next-env.d.ts
 # devqna prep
 devqna-debug.log
 firestore-debug.log
+# keep the documented example (placeholders only, no secrets)
+!.env.example

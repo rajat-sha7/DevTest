@@ -1,64 +1,78 @@
 "use client";
 
-import { Question } from "@/lib/questions";
+import { memo, type ReactNode } from "react";
+import { Bookmark, Check, Flag, StickyNote } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, ChevronRight, Hash } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
 interface QuestionItemProps {
-  question: Question;
+  question: { id: string; question: string; difficulty: string };
   isActive: boolean;
-  isRead: boolean;
-  onClick: () => void;
+  isDone: boolean;
+  isSaved: boolean;
+  isReview: boolean;
+  hasNote: boolean;
+  query: string;
+  onSelect: (id: string) => void;
 }
 
-export function QuestionItem({ question, isActive, isRead, onClick }: QuestionItemProps) {
-  const difficultyColor = 
-    question.difficulty === 'Easy' ? 'text-emerald-500' :
-    question.difficulty === 'Medium' ? 'text-amber-500' :
-    'text-rose-500';
+const DIFF: Record<string, string> = {
+  Easy: "bg-emerald-300",
+  Medium: "bg-amber-300",
+  Hard: "bg-rose-400",
+  Expert: "bg-fuchsia-400",
+};
 
+function highlight(text: string, q: string): ReactNode {
+  const needle = q.trim();
+  if (!needle) return text;
+  const i = text.toLowerCase().indexOf(needle.toLowerCase());
+  if (i === -1) return text;
   return (
-    <div
-      onClick={onClick}
-      className={cn(
-        "group relative flex items-start gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-300 mb-2 border-2",
-        isActive 
-          ? "bg-white border-primary shadow-lg shadow-primary/10 -translate-y-0.5" 
-          : "bg-transparent border-transparent hover:bg-white hover:border-slate-200"
-      )}
-    >
-      <div className={cn(
-        "mt-0.5 shrink-0 transition-all",
-        isRead ? "text-emerald-500" : "text-muted-foreground/10 group-hover:text-muted-foreground/30"
-      )}>
-        <CheckCircle2 className="w-4 h-4" />
-      </div>
-      
-      <div className="flex-1 min-w-0 space-y-1.5">
-        <div className="flex items-center gap-2">
-          <span className={cn("text-[9px] font-bold uppercase tracking-widest", difficultyColor)}>
-            {question.difficulty}
-          </span>
-          <span className="text-[9px] font-bold text-muted-foreground/30">•</span>
-          <span className="text-[9px] font-bold text-muted-foreground/40 font-mono">ID:{question.id}</span>
-        </div>
-        <h3 className={cn(
-          "text-sm font-bold leading-snug transition-colors",
-          isActive ? "text-slate-900" : "text-slate-600 group-hover:text-primary"
-        )}>
-          {question.question}
-        </h3>
-      </div>
-
-      <ChevronRight className={cn(
-        "w-4 h-4 mt-1 shrink-0 transition-all",
-        isActive ? "text-primary translate-x-1" : "text-muted-foreground/20 opacity-0 group-hover:opacity-100"
-      )} />
-
-      {isActive && (
-        <div className="absolute left-[-2px] top-1/2 -translate-y-1/2 w-1.5 h-1/2 bg-primary rounded-r-full" />
-      )}
-    </div>
+    <>
+      {text.slice(0, i)}
+      <mark className="bg-yellow-300 text-[#0b1020] rounded px-0.5">{text.slice(i, i + needle.length)}</mark>
+      {text.slice(i + needle.length)}
+    </>
   );
 }
+
+/** Memoised: a list of hundreds of these must not re-render when one of them changes. */
+export const QuestionItem = memo(function QuestionItem({ question, isActive, isDone, isSaved, isReview, hasNote, query, onSelect }: QuestionItemProps) {
+  return (
+    <button
+      onClick={() => onSelect(question.id)}
+      aria-current={isActive ? "true" : undefined}
+      className={cn(
+        "group w-full text-left flex items-start gap-3 p-3 rounded-xl border-2 transition-all",
+        isActive
+          ? "bg-white border-[#0b1020] shadow-[3px_3px_0_#0b1020] -translate-x-px -translate-y-px"
+          : "bg-transparent border-transparent hover:bg-white hover:border-[#0b1020]/25"
+      )}
+    >
+      <span
+        aria-label={isDone ? "Mastered" : "Not mastered"}
+        className={cn(
+          "mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
+          isDone ? "bg-emerald-400 border-[#0b1020] text-[#0b1020]" : "border-[#0b1020]/20 text-transparent group-hover:border-[#0b1020]/40"
+        )}
+      >
+        <Check className="w-3 h-3" strokeWidth={3.5} />
+      </span>
+
+      <span className="flex-1 min-w-0 space-y-1.5">
+        <span className="flex items-center gap-2">
+          <span className={cn("w-2 h-2 rounded-full border border-[#0b1020]", DIFF[question.difficulty] ?? "bg-slate-300")} />
+          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">{question.difficulty}</span>
+          <span className="ml-auto flex items-center gap-1.5">
+            {isReview && <Flag className="w-3.5 h-3.5 text-pink-500 fill-pink-300" aria-label="Needs review" />}
+            {hasNote && <StickyNote className="w-3.5 h-3.5 text-sky-600" aria-label="Has notes" />}
+            {isSaved && <Bookmark className="w-3.5 h-3.5 text-amber-500 fill-yellow-300" aria-label="Saved" />}
+          </span>
+        </span>
+        <span className={cn("block text-sm font-bold leading-snug", isActive ? "text-[#0b1020]" : "text-slate-700 group-hover:text-[#0b1020]")}>
+          {highlight(question.question, query)}
+        </span>
+      </span>
+    </button>
+  );
+});

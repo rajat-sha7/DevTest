@@ -39,7 +39,8 @@ export const CODING_ROUND_QUESTIONS: CodingQuestion[] = Array.from({ length: 50 
   };
 
   const topicList = isNext ? topics.Next : topics.React;
-  const questionTitle = topicList[i % topicList.length];
+  // walk each topic's list in order so every prompt appears (the first 20 entries are all different)
+  const questionTitle = topicList[Math.floor(i / 2) % topicList.length];
 
   return {
     id: `cr${index}`,

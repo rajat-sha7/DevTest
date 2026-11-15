@@ -1,57 +1,66 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Topic, TOPICS } from "@/lib/questions";
 import { cn } from "@/lib/utils";
-import { Zap, Atom, Code2, Layout, Anchor } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ScrollRow } from "@/components/ui/ScrollRow";
 
 interface TopicSelectorProps {
   currentTopic: Topic;
   onTopicChange: (topic: Topic) => void;
+  /** 0-100 per topic */
+  percent: Record<string, number>;
 }
 
-const iconMap = {
-  zap: Zap,
-  atom: Atom,
-  "code-2": Code2,
-  layout: Layout,
-  anchor: Anchor,
-};
+export function TopicSelector({ currentTopic, onTopicChange, percent }: TopicSelectorProps) {
+  const row = useRef<HTMLDivElement>(null);
 
-export function TopicSelector({ currentTopic, onTopicChange }: TopicSelectorProps) {
-  const currentTopicData = TOPICS.find((t) => t.id === currentTopic) || TOPICS[0];
-  const CurrentIcon = iconMap[currentTopicData.icon as keyof typeof iconMap] || Code2;
+  // keep the selected topic fully visible in the scrolling row (scrolls only this row, never the page)
+  const first = useRef(true);
+  useEffect(() => {
+    const r = row.current;
+    const el = r?.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (!r || !el) return;
+    const a = el.getBoundingClientRect();
+    const b = r.getBoundingClientRect();
+    const pad = 12;
+    let left = r.scrollLeft;
+    if (a.left < b.left + pad) left += a.left - b.left - pad;
+    else if (a.right > b.right - pad) left += a.right - b.right + pad;
+    if (left !== r.scrollLeft) r.scrollTo({ left: Math.max(0, left), behavior: first.current ? "auto" : "smooth" });
+    first.current = false;
+  }, [currentTopic]);
 
   return (
-    <div className="mb-4">
-      <Select value={currentTopic} onValueChange={(val) => onTopicChange(val as Topic)}>
-        <SelectTrigger className="w-full h-10 bg-white border-slate-200 hover:border-primary/50 transition-colors shadow-sm font-semibold rounded-xl text-slate-700">
-          <SelectValue placeholder="Select a topic" />
-        </SelectTrigger>
-        <SelectContent className="rounded-xl shadow-xl border-slate-100">
-          {TOPICS.map((topic) => {
-            const Icon = iconMap[topic.icon as keyof typeof iconMap];
-            return (
-              <SelectItem 
-                key={topic.id} 
-                value={topic.id} 
-                className="cursor-pointer font-medium py-2.5 pl-8 pr-3 focus:bg-primary/5 focus:text-primary transition-colors"
+    <ScrollRow ref={row} role="tablist" aria-label="Topic" className="flex gap-1.5 py-1 -my-1 px-0.5">
+      {TOPICS.map((t) => {
+        const active = t.id === currentTopic;
+        const p = percent[t.id] ?? 0;
+        return (
+          <button
+            key={t.id}
+            role="tab"
+            aria-selected={active}
+            onClick={() => onTopicChange(t.id as Topic)}
+            className={cn(
+              "px-3 py-1.5 rounded-full border-2 border-[#0b1020] text-[13px] font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0",
+              active ? "bg-[#0b1020] text-white shadow-[2px_2px_0_#fde047]" : "bg-white text-[#0b1020] hover:bg-yellow-100"
+            )}
+          >
+            {t.label}
+            {p > 0 && (
+              <span
+                className={cn(
+                  "text-[10px] rounded-full px-1.5 py-px tabular-nums",
+                  active ? "bg-yellow-300 text-[#0b1020]" : "bg-emerald-200 text-emerald-900"
+                )}
               >
-                <div className="flex items-center gap-2.5">
-                  <Icon className="w-4 h-4 opacity-70" />
-                  <span>{topic.label}</span>
-                </div>
-              </SelectItem>
-            );
-          })}
-        </SelectContent>
-      </Select>
-    </div>
+                {p}%
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </ScrollRow>
   );
 }
