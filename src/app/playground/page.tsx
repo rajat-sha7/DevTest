@@ -64,9 +64,12 @@ window.addEventListener('unhandledrejection',function(e){parent.postMessage({__p
 
 function buildDoc(b: Buffers) {
   const safe = (s: string) => s.replace(/<\/script/gi, "<\\/script");
-  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${b.css}</style></head><body>${b.html}<script>${BRIDGE}</script><script>${safe(
-    b.wjs
-  )}</script></body></html>`;
+  // Top-level `await` only works in module scripts; everything else stays a classic script so
+  // functions remain global (inline onclick="fn()" handlers in the HTML keep working).
+  const usesTopLevelAwait = /(^|[\s;(=,])await\s/m.test(b.wjs);
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${b.css}</style></head><body>${b.html}<script>${BRIDGE}</script><script${
+    usesTopLevelAwait ? ' type="module"' : ""
+  }>${safe(b.wjs)}</script></body></html>`;
 }
 
 const LEVEL_CHIP: Record<string, string> = {
@@ -131,25 +134,34 @@ export default function Playground() {
     setEntries([]);
   }, []);
 
-  const push = useCallback((e: Omit<Entry, "id">) => {
-    const text = typeof e.text === "string" && e.text.length > 20000 ? e.text.slice(0, 20000) + " ... (truncated)" : e.text;
-    buffer.current.push({ ...e, text, id: idRef.current++ });
-    if (flushTimer.current) return;
-    flushTimer.current = setTimeout(() => {
+  // writes any batched lines to the console now (also used by the timer)
+  const flushBuffer = useCallback(() => {
+    if (flushTimer.current) {
+      clearTimeout(flushTimer.current);
       flushTimer.current = null;
-      const add = buffer.current;
-      buffer.current = [];
-      setEntries((prev) => {
-        let next = prev.filter((x) => x.id !== -1).concat(add);
-        if (next.length > MAX_ENTRIES) {
-          const cut = next.length - MAX_ENTRIES;
-          hidden.current += cut;
-          next = next.slice(cut);
-        }
-        return hidden.current ? [{ id: -1, kind: "system", text: `... ${hidden.current} earlier lines hidden to save memory ...` }, ...next] : next;
-      });
-    }, 50);
+    }
+    if (!buffer.current.length) return;
+    const add = buffer.current;
+    buffer.current = [];
+    setEntries((prev) => {
+      let next = prev.filter((x) => x.id !== -1).concat(add);
+      if (next.length > MAX_ENTRIES) {
+        const cut = next.length - MAX_ENTRIES;
+        hidden.current += cut;
+        next = next.slice(cut);
+      }
+      return hidden.current ? [{ id: -1, kind: "system", text: `... ${hidden.current} earlier lines hidden to save memory ...` }, ...next] : next;
+    });
   }, []);
+
+  const push = useCallback(
+    (e: Omit<Entry, "id">) => {
+      const text = typeof e.text === "string" && e.text.length > 20000 ? e.text.slice(0, 20000) + " ... (truncated)" : e.text;
+      buffer.current.push({ ...e, text, id: idRef.current++ });
+      if (!flushTimer.current) flushTimer.current = setTimeout(flushBuffer, 50);
+    },
+    [flushBuffer]
+  );
 
   useEffect(
     () => () => {
@@ -333,10 +345,11 @@ export default function Playground() {
         } else if (reason === "timeout") setStatus("timeout");
         else setStatus(hadError ? "error" : "done");
         handle.current = null;
+        flushBuffer(); // write batched lines first, so real output is never mistaken for "no output"
         setEntries((p) => (p.length ? p : [{ id: idRef.current++, kind: "system", text: "(no output - try console.log)" }]));
       },
     });
-  }, [mode, buf, challenge, onWorkerMsg, push]);
+  }, [mode, buf, challenge, onWorkerMsg, push, flushBuffer]);
 
   const runRef = useRef(run);
   runRef.current = run;

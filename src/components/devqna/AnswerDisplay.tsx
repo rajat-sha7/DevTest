@@ -74,7 +74,13 @@ function detectLang(code: string, topic: string): CodeLang {
 /** What the playground can actually run for this question, if anything. */
 function playgroundHref(q: Question): string | null {
   if (!q.code) return null;
-  if (q.topic === "javascript" && !/<[A-Za-z]/.test(q.code)) return playgroundLink("js", { js: q.code });
+  if (q.topic === "javascript") {
+    // examples that touch the page run in the live preview; everything else runs in the console
+    if (/\b(document|window|localStorage|sessionStorage|navigator|location|history)\b\s*[.[(]|\bnew Worker\(/.test(q.code))
+      return playgroundLink("web", { html: "", css: "body { font-family: system-ui, sans-serif; padding: 16px; }", wjs: q.code });
+    if (!/^\s*(import|export)\s/m.test(q.code)) return playgroundLink("js", { js: q.code });
+    return null;
+  }
   if (q.topic === "html-css" && q.code.trimStart().startsWith("<"))
     return playgroundLink("web", { html: q.code, css: "body { font-family: system-ui, sans-serif; padding: 16px; }", wjs: "" });
   return null;

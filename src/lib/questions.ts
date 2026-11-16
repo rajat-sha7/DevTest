@@ -1,3 +1,9 @@
+/* Detailed rewrites live in src/lib/answers/<topic>.json (built from content/answers). */
+import jsAnswers from "./answers/javascript.json";
+
+type Rewrite = { q: string; d: Difficulty; a: string; c: string };
+const JS_REWRITES = jsAnswers as Record<string, Rewrite>;
+
 export type Topic = 'nextjs' | 'react' | 'javascript' | 'html-css' | 'react-hooks';
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 
@@ -475,13 +481,14 @@ const JS_LOGIC_DATA = [
 
 export const JS_QUESTIONS: Question[] = JS_LOGIC_DATA.map((item, i) => {
   const index = i + 1;
+  const r = JS_REWRITES[`j${index}`];
   return {
     id: `j${index}`,
     topic: 'javascript',
-    difficulty: getDifficulty(index),
+    difficulty: r?.d ?? getDifficulty(index),
     question: item.q,
-    answer: item.a,
-    code: item.c,
+    answer: r?.a ?? item.a,
+    code: r?.c ?? item.c,
   };
 });
 
