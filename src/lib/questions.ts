@@ -1,8 +1,10 @@
 /* Detailed rewrites live in src/lib/answers/<topic>.json (built from content/answers). */
 import jsAnswers from "./answers/javascript.json";
+import nextAnswers from "./answers/nextjs.json";
 
 type Rewrite = { q: string; d: Difficulty; a: string; c: string };
 const JS_REWRITES = jsAnswers as Record<string, Rewrite>;
+const NEXT_REWRITES = nextAnswers as Record<string, Rewrite>;
 
 export type Topic = 'nextjs' | 'react' | 'javascript' | 'html-css' | 'react-hooks';
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
@@ -258,13 +260,14 @@ const NEXT_LOGIC_DATA = [
 
 export const NEXTJS_QUESTIONS: Question[] = NEXT_LOGIC_DATA.map((item, i) => {
   const index = i + 1;
+  const r = NEXT_REWRITES[`n${index}`];
   return {
     id: `n${index}`,
     topic: 'nextjs',
-    difficulty: getDifficulty(index),
+    difficulty: r?.d ?? getDifficulty(index),
     question: item.q,
-    answer: item.a,
-    code: item.c,
+    answer: r?.a ?? item.a,
+    code: r?.c ?? item.c,
   };
 });
 
