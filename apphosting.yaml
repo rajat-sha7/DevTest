@@ -1,7 +1,15 @@
-# Settings to manage and configure a DevQnA App Hosting backend.
-# https://devqna-docs.example.com/app-hosting/configure
+# Firebase App Hosting configuration for DevQnA (https://devqna.online).
+# https://firebase.google.com/docs/app-hosting/configure
 
 runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
   maxInstances: 1
+
+env:
+  # Canonical URLs, sitemap, robots.txt, structured data and social cards.
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: https://devqna.online
+    availability:
+      - BUILD
+      - RUNTIME

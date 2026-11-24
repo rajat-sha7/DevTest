@@ -2,6 +2,9 @@ import Link from "next/link";
 import { ALL_QUESTIONS, TOPICS, type Question } from "@/lib/questions";
 import { CODING_ROUND_QUESTIONS } from "@/lib/coding-round-questions";
 import { LogoMark } from "@/components/Logo";
+import { JsonLd } from "@/components/JsonLd";
+import { SITE, abs } from "@/lib/site";
+import { freeOffer, graph, ids, ogImage, webPage } from "@/lib/schema";
 import { Hero3D } from "@/components/landing/hero3d";
 import { FillBar, HeroCarousel, Marquee, Reveal, type HeroItem } from "@/components/landing/motion";
 
@@ -75,8 +78,49 @@ export default function LandingPage() {
   const counts = { Easy: 0, Medium: 0, Hard: 0 } as Record<string, number>;
   ALL_QUESTIONS.forEach((q) => counts[q.difficulty]++);
 
+  const appId = abs("/#app");
+  const schema = graph(
+    webPage({ path: "/", name: SITE.title, description: SITE.description, breadcrumb: false, mainEntity: appId, about: TOPICS.map((t) => t.label) }),
+    {
+      "@type": "WebApplication",
+      "@id": appId,
+      name: SITE.name,
+      alternateName: `${SITE.name} - ${SITE.tagline}`,
+      url: abs("/"),
+      description: SITE.description,
+      applicationCategory: "EducationalApplication",
+      applicationSubCategory: "Interview preparation",
+      operatingSystem: "Any",
+      browserRequirements: "Requires JavaScript. Works in any modern browser.",
+      inLanguage: "en",
+      isAccessibleForFree: true,
+      offers: freeOffer(),
+      image: ogImage(),
+      publisher: { "@id": ids.organization },
+      featureList: [
+        `${total} interview questions across ${TOPICS.map((t) => t.label).join(", ")}`,
+        "Easy, Medium and Hard difficulty levels",
+        "Runnable code examples for every answer",
+        `${CODING_ROUND_QUESTIONS.length} timed Next.js and React coding tasks with worked solutions`,
+        "In-browser JavaScript, TypeScript and HTML/CSS playground",
+        "Progress tracking and bookmarks saved in your browser, no account needed",
+      ],
+    },
+    {
+      "@type": "ItemList",
+      "@id": abs("/#sections"),
+      name: `${SITE.name} sections`,
+      itemListElement: [
+        { name: "Questions & Answers", path: "/questions-answers" },
+        { name: "Coding round", path: "/coding-round" },
+        { name: "Playground", path: "/playground" },
+      ].map((s, i) => ({ "@type": "ListItem", position: i + 1, name: s.name, url: abs(s.path) })),
+    }
+  );
+
   return (
     <div className="min-h-screen bg-[#fff8ec] text-slate-900">
+      <JsonLd data={schema} />
       {/* ---------- Hero ---------- */}
       <div
         className="relative bg-[#2b4bff] text-white"

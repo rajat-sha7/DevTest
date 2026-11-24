@@ -2,7 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { JsonLd } from "@/components/JsonLd";
-import { SITE, abs } from "@/lib/site";
+import { SITE } from "@/lib/site";
+import { graph, organization, website } from "@/lib/schema";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -35,6 +36,16 @@ export const metadata: Metadata = {
   },
   formatDetection: { telephone: false, email: false, address: false },
   appleWebApp: { capable: true, title: SITE.name, statusBarStyle: "default" },
+  ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+    ? {
+        verification: {
+          ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } : {}),
+          ...(process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+            ? { other: { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION } }
+            : {}),
+        },
+      }
+    : {}),
 };
 
 export const viewport: Viewport = {
@@ -43,40 +54,7 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-const siteSchema = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": abs("/#organization"),
-      name: SITE.name,
-      url: abs("/"),
-      logo: { "@type": "ImageObject", url: abs("/apple-icon"), width: 180, height: 180 },
-    },
-    {
-      "@type": "WebSite",
-      "@id": abs("/#website"),
-      url: abs("/"),
-      name: SITE.name,
-      description: SITE.description,
-      inLanguage: "en",
-      publisher: { "@id": abs("/#organization") },
-    },
-    {
-      "@type": "WebApplication",
-      "@id": abs("/#app"),
-      name: `${SITE.name} - ${SITE.tagline}`,
-      url: abs("/"),
-      description: SITE.description,
-      applicationCategory: "EducationalApplication",
-      operatingSystem: "Any",
-      browserRequirements: "Requires JavaScript",
-      isAccessibleForFree: true,
-      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-      publisher: { "@id": abs("/#organization") },
-    },
-  ],
-};
+const siteSchema = graph(organization(), website());
 
 export default function RootLayout({
   children,

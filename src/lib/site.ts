@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 /**
  * Single source of truth for brand + SEO values.
- * Set NEXT_PUBLIC_SITE_URL in production (for example https://your-domain.com)
+ * Set NEXT_PUBLIC_SITE_URL in production (defaults to https://devqna.online)
  * so canonical URLs, the sitemap and social cards point at the real site.
  */
 export const SITE = {
@@ -10,8 +10,8 @@ export const SITE = {
   tagline: "Frontend interview prep",
   title: "DevQnA | Frontend interview prep",
   description:
-    "Practise Next.js, React, JavaScript and CSS interview questions with clear answers and runnable code, plus timed coding tasks and a live JS, TypeScript and HTML playground. Free, no account needed.",
-  url: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/+$/, ""),
+    "Practice Next.js, React, JavaScript and HTML/CSS interview questions with clear answers and runnable code, plus timed coding tasks and a live JavaScript, TypeScript and HTML playground. Free, no account needed.",
+  url: (process.env.NEXT_PUBLIC_SITE_URL || "https://devqna.online").replace(/\/+$/, ""),
   locale: "en_US",
   themeColor: "#2b4bff",
   keywords: [

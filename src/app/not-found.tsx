@@ -4,7 +4,8 @@ import { LogoMark } from "@/components/Logo";
 import { NotFoundPath } from "@/components/NotFoundPath";
 
 export const metadata: Metadata = {
-  title: "Page not found | DevQnA",
+  title: "Page not found",
+  robots: { index: false, follow: true },
 };
 
 const links = [

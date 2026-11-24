@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Code2, Layout, Zap, Atom, Trophy, Terminal, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LogoMark } from "@/components/Logo";
+import { DocbarSchema } from "./schema";
 
 const topics = [
   { id: "react", label: "React", icon: <Atom className="w-8 h-8" /> },
@@ -20,6 +21,7 @@ export default function DocBar() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white overflow-x-hidden">
+      <DocbarSchema />
       {/* Navigation */}
       <nav className="h-16 border-b border-slate-100 sticky top-0 bg-white/80 backdrop-blur-md z-50">
         <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6 lg:px-12">
