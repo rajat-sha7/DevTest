@@ -161,6 +161,7 @@ export default function LandingPage() {
               <a href="#topics" className="px-3 py-2 rounded-lg hover:bg-white/15 hidden md:block">Topics</a>
               <Link href="/coding-round" className="px-2 sm:px-3 py-2 rounded-lg hover:bg-white/15 whitespace-nowrap">Coding round</Link>
               <Link href="/playground" className="px-3 py-2 rounded-lg hover:bg-white/15 hidden sm:block">Playground</Link>
+              <Link href="/about" className="px-3 py-2 rounded-lg hover:bg-white/15 hidden lg:block">About</Link>
               <details className="relative md:hidden">
                 <summary
                   aria-label="More links"
@@ -172,6 +173,7 @@ export default function LandingPage() {
                   <a href="#topics" className="block px-3 py-2.5 rounded-lg font-semibold hover:bg-yellow-200">Topics</a>
                   <Link href="/playground" className="block px-3 py-2.5 rounded-lg font-semibold hover:bg-yellow-200">Playground</Link>
                   <Link href="/questions-answers" className="block px-3 py-2.5 rounded-lg font-semibold hover:bg-yellow-200">All questions</Link>
+                  <Link href="/about" className="block px-3 py-2.5 rounded-lg font-semibold hover:bg-yellow-200">About</Link>
                 </div>
               </details>
               <Link
@@ -482,6 +484,7 @@ export default function LandingPage() {
                 <li><Link href="/coding-round" className="hover:text-white transition-colors">Coding round</Link></li>
                 <li><Link href="/playground" className="hover:text-white transition-colors">Playground</Link></li>
                 <li><Link href="/docbar" className="hover:text-white transition-colors">Docs</Link></li>
+                <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
               </ul>
             </nav>
 

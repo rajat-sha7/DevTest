@@ -51,6 +51,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("/questions-answers", ["src/app/questions-answers", "src/components/devqna", ...QUESTIONS], 0.9, "weekly"),
     page("/coding-round", ["src/app/coding-round", "src/lib/coding-round-questions.ts", "src/lib/coding-round-content.ts"], 0.8, "monthly"),
     page("/playground", ["src/app/playground", "src/lib/playground"], 0.8, "monthly"),
+    page("/about", ["src/app/about"], 0.5, "monthly"),
     page("/docbar", ["src/app/docbar", "src/app/docData.ts"], 0.5, "monthly"),
     ...Object.keys(docData).map((topic) =>
       page(`/docbar/${encodeURIComponent(topic)}`, ["src/app/docbar", "src/app/docData.ts"], 0.4, "monthly")

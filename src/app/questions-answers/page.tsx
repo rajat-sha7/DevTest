@@ -214,6 +214,26 @@ function DashboardContent() {
     closeDrawer();
   }, []);
 
+  /* ---------- follow links that change ?topic / ?q / ?difficulty while already on this page ---------- */
+  // (initial values are read by useState above; this handles later client-side navigations,
+  //  e.g. Qubi's "See the answer" or footer links clicked from within the Q&A page)
+  const lastUrl = useRef(`${urlTopic}|${urlQ}|${urlDifficulty}`);
+  useEffect(() => {
+    const key = `${urlTopic}|${urlQ}|${urlDifficulty}`;
+    if (key === lastUrl.current) return;
+    lastUrl.current = key;
+    const t = isTopic(urlTopic) ? urlTopic : topic;
+    if (urlQ) open(t, urlQ);
+    else if (isTopic(urlTopic)) {
+      setTopic(urlTopic);
+      setSelectedId(null);
+      setView("study");
+      toTop();
+    }
+    if (urlDifficulty === "Easy" || urlDifficulty === "Medium" || urlDifficulty === "Hard") setDifficulty(urlDifficulty);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlTopic, urlQ, urlDifficulty, open]);
+
   const next = useCallback(() => {
     const target = pos === -1 ? list[0] : list[pos + 1];
     if (target) goto(target.id);
