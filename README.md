@@ -1,7 +1,7 @@
 
-# DevQnA Prep
+# DevQnA
 
-Welcome to DevQnA Prep! This project is designed to help you prepare for coding interviews and technical rounds with interactive Q&A, explanations, and examples.
+Welcome to DevQnA! This project is designed to help you prepare for coding interviews and technical rounds with interactive Q&A, explanations, and examples.
 
 ## Getting Started
 

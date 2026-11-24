@@ -1,5 +1,5 @@
-# Settings to manage and configure a DevQnA Prep App Hosting backend.
-# https://devqna-prep-docs.example.com/app-hosting/configure
+# Settings to manage and configure a DevQnA App Hosting backend.
+# https://devqna-docs.example.com/app-hosting/configure
 
 runConfig:
   # Increase this value if you'd like to automatically spin up

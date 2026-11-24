@@ -2,11 +2,13 @@
 import jsAnswers from "./answers/javascript.json";
 import nextAnswers from "./answers/nextjs.json";
 import reactAnswers from "./answers/react.json";
+import htmlCssAnswers from "./answers/html-css.json";
 
 type Rewrite = { q: string; d: Difficulty; a: string; c: string };
 const JS_REWRITES = jsAnswers as Record<string, Rewrite>;
 const NEXT_REWRITES = nextAnswers as Record<string, Rewrite>;
 const REACT_REWRITES = reactAnswers as Record<string, Rewrite>;
+const HTML_CSS_REWRITES = htmlCssAnswers as Record<string, Rewrite>;
 
 export type Topic = 'nextjs' | 'react' | 'javascript' | 'html-css' | 'react-hooks';
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
@@ -840,13 +842,14 @@ const HTML_CSS_LOGIC_DATA = [
 
 export const HTML_CSS_QUESTIONS: Question[] = HTML_CSS_LOGIC_DATA.map((item, i) => {
   const index = i + 1;
+  const r = HTML_CSS_REWRITES[`hc${index}`];
   return {
     id: `hc${index}`,
     topic: 'html-css',
-    difficulty: getDifficulty(index),
+    difficulty: r?.d ?? getDifficulty(index),
     question: item.q,
-    answer: item.a,
-    code: item.c,
+    answer: r?.a ?? item.a,
+    code: r?.c ?? item.c,
   };
 });
 
