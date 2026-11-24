@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ALL_QUESTIONS, TOPICS, type Question } from "@/lib/questions";
 import { CODING_ROUND_QUESTIONS } from "@/lib/coding-round-questions";
+import { cleanTitle } from "@/lib/coding-round-content";
 import { LogoMark } from "@/components/Logo";
 import { JsonLd } from "@/components/JsonLd";
 import { SITE, abs } from "@/lib/site";
@@ -56,6 +57,12 @@ function summary(md: string, max = 150) {
 
 const byTopic = (id: string) => ALL_QUESTIONS.filter((q) => q.topic === id);
 const pick = (id: string, i: number): Question => byTopic(id)[i];
+const qHref = (q: Question) => `/questions-answers?topic=${q.topic}&q=${q.id}`;
+/** The coding round lists each task once (by title), so link to the first task with that title. */
+const roundHref = (question: string) => {
+  const first = CODING_ROUND_QUESTIONS.find((x) => cleanTitle(x.question) === cleanTitle(question));
+  return first ? `/coding-round?q=${first.id}` : "/coding-round";
+};
 
 const hardShadow = (n = 5) => ({ boxShadow: `${n}px ${n}px 0 ${INK}` });
 
@@ -233,51 +240,66 @@ export default function LandingPage() {
               const c = CARD[t.id];
               return (
                 <Reveal key={t.id} delay={idx * 80} className="h-full">
-                  <Link
-                    href="/questions-answers"
-                    className={`group flex flex-col h-full rounded-2xl p-5 sm:p-6 border-2 border-[#0b1020] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 ${c.bg} ${c.text}`}
+                  <div
+                    className={`group relative flex flex-col h-full rounded-2xl p-5 sm:p-6 border-2 border-[#0b1020] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 focus-within:-translate-x-1 focus-within:-translate-y-1 ${c.bg} ${c.text}`}
                     style={hardShadow(5)}
                   >
                     <h3 className="text-2xl font-extrabold">{t.label}</h3>
                     <p className={`mt-2 leading-relaxed ${c.sub}`}>{BLURB[t.id]}</p>
                     <ul className="mt-5 space-y-2.5 flex-1">
                       {[0, 3, 7].map((i) => (
-                        <li key={i} className="flex gap-2.5 font-medium leading-snug">
-                          <span className="mt-0.5 shrink-0">→</span>
-                          <span className="line-clamp-2">{t.list[i].question}</span>
+                        <li key={i}>
+                          {/* sits above the card-wide link so it opens this exact question */}
+                          <Link
+                            href={qHref(t.list[i])}
+                            className="relative z-10 flex gap-2.5 font-medium leading-snug rounded hover:underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                          >
+                            <span className="mt-0.5 shrink-0" aria-hidden>→</span>
+                            <span className="line-clamp-2">{t.list[i].question}</span>
+                          </Link>
                         </li>
                       ))}
                     </ul>
-                    <span className="mt-6 font-bold">
+                    <Link
+                      href={`/questions-answers?topic=${t.id}`}
+                      className="mt-6 font-bold rounded after:absolute after:inset-0 after:rounded-2xl after:content-[''] focus-visible:outline-none focus-visible:after:outline focus-visible:after:outline-4 focus-visible:after:outline-offset-4 focus-visible:after:outline-yellow-300"
+                    >
                       Start {t.label}{" "}
-                      <span className="inline-block transition-transform group-hover:translate-x-1.5">→</span>
-                    </span>
-                  </Link>
+                      <span className="inline-block transition-transform group-hover:translate-x-1.5" aria-hidden>→</span>
+                    </Link>
+                  </div>
                 </Reveal>
               );
             })}
 
             <Reveal delay={400} className="h-full">
-              <Link
-                href="/coding-round"
-                className="group flex flex-col h-full rounded-2xl p-5 sm:p-6 border-2 border-[#0b1020] bg-[#2b4bff] text-white transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1"
+              <div
+                className="group relative flex flex-col h-full rounded-2xl p-5 sm:p-6 border-2 border-[#0b1020] bg-[#2b4bff] text-white transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 focus-within:-translate-x-1 focus-within:-translate-y-1"
                 style={hardShadow(5)}
               >
                 <h3 className="text-2xl font-extrabold">Coding round</h3>
                 <p className="mt-2 text-blue-50 leading-relaxed">Hands-on tasks like the ones in live screening calls.</p>
                 <ul className="mt-5 space-y-2.5 flex-1">
                   {rounds.map((r) => (
-                    <li key={r.id} className="flex gap-2.5 font-medium leading-snug">
-                      <span className="mt-0.5 shrink-0">→</span>
-                      <span className="line-clamp-2">{r.question}</span>
+                    <li key={r.id}>
+                      <Link
+                        href={roundHref(r.question)}
+                        className="relative z-10 flex gap-2.5 font-medium leading-snug rounded hover:underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                      >
+                        <span className="mt-0.5 shrink-0" aria-hidden>→</span>
+                        <span className="line-clamp-2">{r.question}</span>
+                      </Link>
                     </li>
                   ))}
                 </ul>
-                <span className="mt-6 font-bold">
+                <Link
+                  href="/coding-round"
+                  className="mt-6 font-bold rounded after:absolute after:inset-0 after:rounded-2xl after:content-[''] focus-visible:outline-none focus-visible:after:outline focus-visible:after:outline-4 focus-visible:after:outline-offset-4 focus-visible:after:outline-yellow-300"
+                >
                   Open coding round{" "}
-                  <span className="inline-block transition-transform group-hover:translate-x-1.5">→</span>
-                </span>
-              </Link>
+                  <span className="inline-block transition-transform group-hover:translate-x-1.5" aria-hidden>→</span>
+                </Link>
+              </div>
             </Reveal>
           </div>
         </div>
@@ -292,7 +314,7 @@ export default function LandingPage() {
             {featured.map((q, idx) => (
               <Reveal key={q.id} delay={(idx % 2) * 100} className="h-full">
                 <Link
-                  href="/questions-answers"
+                  href={qHref(q)}
                   className="block h-full rounded-2xl p-5 sm:p-6 bg-[#fff8ec] border-2 border-[#0b1020] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1"
                   style={hardShadow(5)}
                 >
