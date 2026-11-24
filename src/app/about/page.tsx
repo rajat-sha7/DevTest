@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { LogoMark } from "@/components/Logo";
 import { JsonLd } from "@/components/JsonLd";
+import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { SITE, socialMeta } from "@/lib/site";
 import { breadcrumb, graph, ids, webPage } from "@/lib/schema";
 import { ALL_QUESTIONS, TOPICS } from "@/lib/questions";
@@ -68,6 +69,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-[#fff8ec] text-slate-900">
       <JsonLd data={schema} />
+      <AnnouncementBar />
 
       <header className="sticky top-0 z-20 bg-[#2b4bff]/95 backdrop-blur border-b-2 border-[#0b1020] text-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-5 h-16 flex items-center justify-between">

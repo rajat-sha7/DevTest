@@ -4,6 +4,7 @@ import { CODING_ROUND_QUESTIONS } from "@/lib/coding-round-questions";
 import { cleanTitle } from "@/lib/coding-round-content";
 import { LogoMark } from "@/components/Logo";
 import { JsonLd } from "@/components/JsonLd";
+import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { SITE, abs } from "@/lib/site";
 import { freeOffer, graph, ids, ogImage, webPage } from "@/lib/schema";
 import { Hero3D } from "@/components/landing/hero3d";
@@ -143,6 +144,7 @@ export default function LandingPage() {
   return (
     <div id="top" className="min-h-screen bg-[#fff8ec] text-slate-900">
       <JsonLd data={schema} />
+      <AnnouncementBar />
       {/* ---------- Hero ---------- */}
       <div
         className="relative bg-[#2b4bff] text-white"

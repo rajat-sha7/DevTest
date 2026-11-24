@@ -201,3 +201,11 @@ html, body { overflow-x: hidden; }
 @keyframes tts-bar { 0%, 100% { height: 30%; } 50% { height: 100%; } }
 .tts-bar { height: 30%; animation: tts-bar .7s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .tts-bar { animation: none; height: 70%; } }
+
+/* ---- announcement bar ---- */
+[data-announce-dismissed] .announce-bar { display: none; }
+@keyframes announce-shine { from { transform: translateX(0); } to { transform: translateX(450%); } }
+@keyframes announce-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.7); } }
+.announce-shine { animation: announce-shine 6s ease-in-out infinite; }
+.announce-dot { animation: announce-dot 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .announce-shine, .announce-dot { animation: none; } }
