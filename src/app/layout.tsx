@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { JsonLd } from "@/components/JsonLd";
+import { Mascot } from "@/components/landing/mascot";
+import { ALL_QUESTIONS, TOPICS } from "@/lib/questions";
 import { SITE } from "@/lib/site";
 import { graph, organization, website } from "@/lib/schema";
 
@@ -56,6 +58,13 @@ export const viewport: Viewport = {
 
 const siteSchema = graph(organization(), website());
 
+// Qubi's question pool: a small fixed sample (6 easy/medium per topic) keeps the client payload tiny
+const mascotQuestions = TOPICS.flatMap((t) =>
+  ALL_QUESTIONS.filter((q) => q.topic === t.id && q.difficulty !== "Hard")
+    .slice(0, 6)
+    .map((q) => ({ id: q.id, topic: q.topic, question: q.question }))
+);
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -71,6 +80,7 @@ export default function RootLayout({
       </head>
       <body className="font-body bg-background text-foreground antialiased">
         {children}
+        <Mascot questions={mascotQuestions} />
         <Toaster />
       </body>
     </html>

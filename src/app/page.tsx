@@ -7,7 +7,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { SITE, abs } from "@/lib/site";
 import { freeOffer, graph, ids, ogImage, webPage } from "@/lib/schema";
 import { Hero3D } from "@/components/landing/hero3d";
-import { HeroCarousel, Marquee, Reveal, type HeroItem } from "@/components/landing/motion";
+import { CountUp, HeroCarousel, Marquee, Reveal, type HeroItem } from "@/components/landing/motion";
 import { DifficultyMeter, Steps, type LevelStat } from "@/components/landing/how-it-works";
 
 const INK = "#0b1020";
@@ -141,7 +141,7 @@ export default function LandingPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#fff8ec] text-slate-900">
+    <div id="top" className="min-h-screen bg-[#fff8ec] text-slate-900">
       <JsonLd data={schema} />
       {/* ---------- Hero ---------- */}
       <div
@@ -374,29 +374,142 @@ export default function LandingPage() {
       </section>
 
       {/* ---------- CTA ---------- */}
-      <section className="bg-yellow-300 border-y-2 border-[#0b1020]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-5 py-12 md:py-20 flex flex-col md:flex-row md:items-center justify-between gap-8">
-          <div>
-            <h2 className="text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.05]">Interview coming up?</h2>
-            <p className="mt-3 text-lg md:text-xl font-medium">Answer your first question in under a minute.</p>
-          </div>
-          <Link
-            href="/questions-answers"
-            className="md:self-auto shrink-0 px-8 py-4 rounded-xl text-center bg-[#0b1020] text-white text-base sm:text-lg font-extrabold hover:-translate-y-1 transition-transform"
-            style={{ boxShadow: "5px 5px 0 #2b4bff" }}
-          >
-            Start practising →
-          </Link>
+      <section className="relative overflow-hidden bg-yellow-300 border-y-2 border-[#0b1020]">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-40"
+          style={{ backgroundImage: "radial-gradient(rgb(11 16 32 / .18) 1.3px, transparent 1.3px)", backgroundSize: "22px 22px" }}
+        />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-5 py-14 md:py-20 grid lg:grid-cols-[1.25fr_1fr] gap-10 lg:gap-14 items-center">
+          <Reveal>
+            <p className="inline-block px-3 py-1 rounded-full bg-[#0b1020] text-yellow-300 text-xs font-bold tracking-widest uppercase">Free · no account</p>
+            <h2 className="mt-4 text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.02]">Interview coming up?</h2>
+            <p className="mt-4 text-lg md:text-xl font-medium max-w-xl">
+              Answer your first question in under a minute. Short answer first, runnable code right after.
+            </p>
+            <div className="mt-7 flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <Link
+                href="/questions-answers"
+                className="group px-7 py-4 rounded-xl text-center bg-[#0b1020] text-white text-base sm:text-lg font-extrabold border-2 border-[#0b1020] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                style={{ boxShadow: "5px 5px 0 #2b4bff" }}
+              >
+                Start practicing <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
+              </Link>
+              <Link
+                href="/coding-round"
+                className="px-7 py-4 rounded-xl text-center bg-white text-[#0b1020] text-base sm:text-lg font-extrabold border-2 border-[#0b1020] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                style={hardShadow(5)}
+              >
+                Try a timed coding task
+              </Link>
+            </div>
+            <div className="mt-7">
+              <p className="text-sm font-bold">Jump straight to a topic</p>
+              <div className="mt-2.5 flex flex-wrap gap-2">
+                {topics.map((t) => (
+                  <Link
+                    key={t.id}
+                    href={`/questions-answers?topic=${t.id}`}
+                    className={`px-3.5 py-1.5 rounded-full border-2 border-[#0b1020] text-sm font-bold transition-transform hover:-translate-y-0.5 ${CHIP[t.id]}`}
+                  >
+                    {t.label} <span className="font-medium opacity-70 tabular-nums">{t.list.length}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+
+          <Reveal delay={150}>
+            <dl className="grid grid-cols-2 gap-3 sm:gap-4">
+              {[
+                { n: total, label: "interview questions", bg: "bg-white" },
+                { n: CODING_ROUND_QUESTIONS.length, label: "timed coding tasks", bg: "bg-sky-300" },
+                { n: topics.length, label: "topics, easy to hard", bg: "bg-pink-300" },
+                { n: runnable, label: "examples you can run", bg: "bg-violet-300" },
+              ].map((s) => (
+                <div
+                  key={s.label}
+                  className={`rounded-2xl border-2 border-[#0b1020] p-4 sm:p-5 transition-transform hover:-translate-y-1 ${s.bg}`}
+                  style={hardShadow(4)}
+                >
+                  <dt className="sr-only">{s.label}</dt>
+                  <dd className="text-3xl sm:text-4xl font-black tracking-tight">
+                    <CountUp to={s.n} />
+                  </dd>
+                  <dd className="mt-1 text-sm font-semibold text-slate-800">{s.label}</dd>
+                </div>
+              ))}
+            </dl>
+          </Reveal>
         </div>
       </section>
 
-      <footer className="bg-[#0b1020] text-slate-400">
-        <div className="max-w-6xl mx-auto px-4 sm:px-5 py-8 flex flex-col sm:flex-row sm:justify-between gap-3 text-sm">
-          <span>© {new Date().getFullYear()} DevQnA</span>
-          <div className="flex gap-6">
-            <Link href="/questions-answers" className="hover:text-white">Questions</Link>
-            <Link href="/coding-round" className="hover:text-white">Coding round</Link>
-            <Link href="/playground" className="hover:text-white">Playground</Link>
+      {/* ---------- Footer ---------- */}
+      <footer className="relative bg-[#0b1020] text-slate-400">
+        <div className="max-w-6xl mx-auto px-4 sm:px-5 pt-12 pb-8">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+            <div>
+              <Link href="/" className="inline-flex items-center gap-2 text-white font-extrabold text-xl tracking-tight">
+                <LogoMark />
+                DevQnA
+              </Link>
+              <p className="mt-3 max-w-xs leading-relaxed">
+                Frontend interview prep with clear answers, runnable code and timed coding rounds.
+              </p>
+              <p className="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-slate-300 border border-white/15 rounded-full px-3 py-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" aria-hidden />
+                No account. Progress stays in your browser.
+              </p>
+            </div>
+
+            <nav aria-label="Topics">
+              <h3 className="text-white font-bold">Practice</h3>
+              <ul className="mt-3 space-y-2">
+                {topics.map((t) => (
+                  <li key={t.id}>
+                    <Link href={`/questions-answers?topic=${t.id}`} className="hover:text-white transition-colors">
+                      {t.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            <nav aria-label="Tools">
+              <h3 className="text-white font-bold">Tools</h3>
+              <ul className="mt-3 space-y-2">
+                <li><Link href="/questions-answers" className="hover:text-white transition-colors">All questions</Link></li>
+                <li><Link href="/coding-round" className="hover:text-white transition-colors">Coding round</Link></li>
+                <li><Link href="/playground" className="hover:text-white transition-colors">Playground</Link></li>
+                <li><Link href="/docbar" className="hover:text-white transition-colors">Docs</Link></li>
+              </ul>
+            </nav>
+
+            <nav aria-label="By difficulty">
+              <h3 className="text-white font-bold">By difficulty</h3>
+              <ul className="mt-3 space-y-2">
+                {levels.map((l) => {
+                  const top = [...l.byTopic].sort((a, b) => b.count - a.count)[0];
+                  return (
+                    <li key={l.level}>
+                      <Link
+                        href={`/questions-answers?${top ? `topic=${top.id}&` : ""}difficulty=${l.level}`}
+                        className="hover:text-white transition-colors"
+                      >
+                        {l.level} <span className="tabular-nums text-slate-500">({l.count})</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          </div>
+
+          <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
+            <span>© {new Date().getFullYear()} DevQnA · devqna.online</span>
+            <a href="#top" className="group inline-flex items-center gap-1.5 font-semibold text-slate-300 hover:text-white">
+              Back to top <span className="inline-block transition-transform group-hover:-translate-y-0.5" aria-hidden>↑</span>
+            </a>
           </div>
         </div>
       </footer>

@@ -138,3 +138,42 @@ html, body { overflow-x: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .anim-shine, .anim-pop-in { animation: none !important; }
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+/* ---- Qubi, the mascot (position is driven from JS; these are the body animations) ---- */
+@keyframes mascot-bob { 50% { transform: translateY(-3px); } }
+@keyframes mascot-leg { 0%, 100% { transform: rotate(22deg); } 50% { transform: rotate(-22deg); } }
+@keyframes mascot-antenna { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(10deg); } }
+@keyframes mascot-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+@keyframes mascot-wave { 0%, 60%, 100% { transform: rotate(0); } 70%, 90% { transform: rotate(-35deg); } 80% { transform: rotate(10deg); } }
+@keyframes mascot-hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-18px) rotate(-6deg); } 70% { transform: translateY(0) scale(1.05, .92); } }
+@keyframes mascot-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-1.5px) rotate(-2deg); } 75% { transform: translateX(1.5px) rotate(2deg); } }
+@keyframes mascot-alert { 0% { transform: translateY(6px) scale(.4); opacity: 0; } 60% { transform: translateY(-2px) scale(1.2); opacity: 1; } 100% { transform: none; } }
+@keyframes mascot-sweat { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(10px); opacity: 0; } }
+
+/* idle: blink, wobble antenna, wave now and then */
+.mascot .mascot-eyes { animation: mascot-blink 4s infinite; }
+.mascot .mascot-antenna { animation: mascot-antenna .9s ease-in-out infinite; }
+.mascot .mascot-arm { animation: mascot-wave 3s ease-in-out infinite; }
+.mascot-hop { animation: mascot-hop .6s cubic-bezier(.3,.7,.3,1); }
+
+/* walking: legs swing and body bobs only while actually moving */
+.mascot[data-moving] .mascot-bob { animation: mascot-bob .45s ease-in-out infinite; }
+.mascot[data-moving] .mascot-leg-a { animation: mascot-leg .45s ease-in-out infinite; }
+.mascot[data-moving] .mascot-leg-b { animation: mascot-leg .45s ease-in-out infinite reverse; }
+
+/* scared: legs and bob go into overdrive, antenna buzzes, the whole body trembles */
+.mascot[data-mood="scared"] :is(.mascot-bob, .mascot-leg-a, .mascot-leg-b) { animation-duration: .16s; }
+.mascot:is([data-mood="scared"], [data-mood="caught"]) .mascot-antenna { animation-duration: .2s; }
+.mascot:is([data-mood="scared"], [data-mood="caught"]) .mascot-arm { animation: none; }
+.mascot[data-mood="caught"] .mascot-shake { animation: mascot-shake .12s linear infinite; }
+.mascot[data-mood="scared"] .mascot-shake { animation: mascot-shake .2s linear infinite; }
+.mascot-alert { animation: mascot-alert .35s cubic-bezier(.2,.8,.2,1) both; }
+.mascot-sweat { animation: mascot-sweat .7s ease-in infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot *, .mascot-hop, .mascot-alert { animation: none !important; }
+}
