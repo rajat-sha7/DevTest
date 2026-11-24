@@ -9,6 +9,7 @@ const ROWS: [string, string][] = [
   ["m", "Mark as mastered"],
   ["b", "Save for later"],
   ["r", "Flag for review"],
+  ["l", "Listen to the answer / pause"],
   ["p", "Practice mode on / off"],
   ["Space", "Reveal the answer (practice mode)"],
   ["1  /  2", "Got it / Need to review (practice mode)"],

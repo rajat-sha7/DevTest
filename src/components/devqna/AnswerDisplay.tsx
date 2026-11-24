@@ -25,6 +25,7 @@ import { Question, TOPICS } from "@/lib/questions";
 import { generateExplanationAndExample, GenerateExplanationAndExampleOutput } from "@/ai/flows/generate-explanation-and-example";
 import { CodePanel, type CodeLang } from "@/components/devqna/CodePanel";
 import { NotesBox } from "@/components/devqna/NotesBox";
+import { ListenControls } from "@/components/devqna/ListenControls";
 import { playgroundLink } from "@/lib/playground/share";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -304,6 +305,9 @@ export function AnswerDisplay({
         </section>
       ) : (
         <>
+          {/* read the question and answer aloud */}
+          <ListenControls key={question.id} title={question.question} answer={question.answer} className="mt-4" />
+
           <section className="mt-10 text-base md:text-lg leading-relaxed text-slate-700">
             <Markdown text={question.answer} />
           </section>

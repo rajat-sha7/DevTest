@@ -196,3 +196,8 @@ html, body { overflow-x: hidden; }
   .mascot *, .mascot-hop, .mascot-alert { animation: none !important; }
   .mascot-quip { transform: translateX(-50%); }
 }
+
+/* ---- "Listen" equalizer bars ---- */
+@keyframes tts-bar { 0%, 100% { height: 30%; } 50% { height: 100%; } }
+.tts-bar { height: 30%; animation: tts-bar .7s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .tts-bar { animation: none; height: 70%; } }
