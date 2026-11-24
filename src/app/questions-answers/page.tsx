@@ -87,6 +87,7 @@ function DashboardContent() {
   const params = useSearchParams();
   const urlTopic = params.get("topic");
   const urlQ = params.get("q");
+  const urlDifficulty = params.get("difficulty");
   const study = useStudy();
   const { toast } = useToast();
 
@@ -95,7 +96,9 @@ function DashboardContent() {
   const [view, setView] = useState<"study" | "overview">("study");
   const [query, setQuery] = useState("");
   const [dq, setDq] = useState("");
-  const [difficulty, setDifficulty] = useState<Difficulty | "All">("All");
+  const [difficulty, setDifficulty] = useState<Difficulty | "All">(
+    urlDifficulty === "Easy" || urlDifficulty === "Medium" || urlDifficulty === "Hard" ? urlDifficulty : "All"
+  );
   const [status, setStatus] = useState<Status>("all");
   const [sort, setSort] = useState<Sort>("default");
   const [sidebar, setSidebar] = useState(true);

@@ -7,7 +7,8 @@ import { JsonLd } from "@/components/JsonLd";
 import { SITE, abs } from "@/lib/site";
 import { freeOffer, graph, ids, ogImage, webPage } from "@/lib/schema";
 import { Hero3D } from "@/components/landing/hero3d";
-import { FillBar, HeroCarousel, Marquee, Reveal, type HeroItem } from "@/components/landing/motion";
+import { HeroCarousel, Marquee, Reveal, type HeroItem } from "@/components/landing/motion";
+import { DifficultyMeter, Steps, type LevelStat } from "@/components/landing/how-it-works";
 
 const INK = "#0b1020";
 
@@ -84,6 +85,20 @@ export default function LandingPage() {
   const rounds = [CODING_ROUND_QUESTIONS[1], CODING_ROUND_QUESTIONS[2], CODING_ROUND_QUESTIONS[5]];
   const counts = { Easy: 0, Medium: 0, Hard: 0 } as Record<string, number>;
   ALL_QUESTIONS.forEach((q) => counts[q.difficulty]++);
+  const levels: LevelStat[] = (["Easy", "Medium", "Hard"] as const).map((level) => ({
+    level,
+    count: counts[level],
+    byTopic: TOPICS.map((t) => ({ id: t.id, label: t.label, count: byTopic(t.id).filter((q) => q.difficulty === level).length })).filter((t) => t.count > 0),
+  }));
+  // examples the playground can open directly (same rules as the Q&A "Run" button)
+  const runnable = ALL_QUESTIONS.filter((q) =>
+    q.topic === "javascript" ? !!q.code && !/^\s*(import|export)\s/m.test(q.code) : q.topic === "html-css" && !!q.code?.trimStart().startsWith("<")
+  ).length;
+  const steps = [
+    { title: "Choose a topic and difficulty", body: `${TOPICS.length} topics, each split into Easy, Medium and Hard. Refresh the basics, or jump straight to Hard if your interview is close.` },
+    { title: "Read the answer, then run the code", body: `Every answer comes with a code example, and ${runnable} JavaScript and HTML/CSS examples open in the playground in one click.` },
+    { title: "Mark what you know", body: "Mastered, review later or bookmarked: progress is saved in your browser, so you always see what is left." },
+  ];
 
   const appId = abs("/#app");
   const schema = graph(
@@ -338,49 +353,21 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-5 py-14 md:py-20 grid lg:grid-cols-2 gap-12 lg:gap-16">
           <div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">Three steps.</h2>
-            <ol className="mt-9 space-y-8">
-              {[
-                ["Choose a topic and difficulty", "Start easy to refresh the basics, or jump straight to Hard if your interview is close."],
-                ["Read the answer, then run the code", "Every answer has an example. Open it in the playground and change it."],
-                ["Mark what you know", "Progress is saved in your browser, so you always see what is left."],
-              ].map(([h, b], i) => (
-                <li key={h}>
-                  <Reveal delay={i * 120} className="flex gap-5">
-                    <span className="w-11 h-11 rounded-full bg-yellow-300 text-[#0b1020] text-lg font-black flex items-center justify-center shrink-0">{i + 1}</span>
-                    <div>
-                      <h3 className="text-xl font-bold">{h}</h3>
-                      <p className="mt-1 text-slate-300 leading-relaxed">{b}</p>
-                    </div>
-                  </Reveal>
-                </li>
-              ))}
-            </ol>
+            <Steps steps={steps} />
           </div>
 
           <div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">Start gentle. Finish sharp.</h2>
-            <div className="mt-9 space-y-6">
-              {(["Easy", "Medium", "Hard"] as const).map((d) => (
-                <div key={d}>
-                  <div className="flex justify-between mb-2">
-                    <span className="font-bold text-lg">{d}</span>
-                    <span className="text-slate-300">
-                      {d === "Easy" ? "Refresh the basics" : d === "Medium" ? "Build confidence" : "Interview-level depth"}
-                    </span>
-                  </div>
-                  <FillBar
-                    percent={(counts[d] / total) * 100}
-                    track="bg-white/15"
-                    className={d === "Easy" ? "bg-emerald-400" : d === "Medium" ? "bg-yellow-300" : "bg-pink-400"}
-                  />
-                </div>
-              ))}
-            </div>
+            <p className="mt-3 text-slate-300">
+              {total} questions across {TOPICS.length} topics. Pick a level to jump straight in.
+            </p>
+            <DifficultyMeter stats={levels} total={total} />
             <Link
               href="/playground"
-              className="mt-10 inline-block px-6 py-3.5 rounded-xl border-2 border-white font-bold hover:bg-white hover:text-[#0b1020] transition-colors"
+              className="group mt-8 inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border-2 border-white font-bold hover:bg-white hover:text-[#0b1020] transition-colors"
             >
-              Open the JS playground
+              Open the playground
+              <span className="text-slate-400 font-medium group-hover:text-slate-600">JS · TS · HTML/CSS</span>
             </Link>
           </div>
         </div>
