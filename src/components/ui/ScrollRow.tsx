@@ -11,7 +11,6 @@ import {
   type MouseEvent,
   type PointerEvent,
 } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
@@ -23,8 +22,8 @@ interface Props extends HTMLAttributes<HTMLDivElement> {
 
 /**
  * A horizontally scrolling row that is obvious to use on any device:
- * edge fades and arrow buttons appear when there is more to see, the mouse
- * wheel scrolls it sideways, and it can be dragged. Touch scrolls natively.
+ * edge fades appear when there is more to see, the mouse wheel scrolls it
+ * sideways, and it can be dragged with the mouse. Touch scrolls natively.
  */
 export const ScrollRow = forwardRef<HTMLDivElement, Props>(function ScrollRow(
   { className, wrapperClassName, fade = "from-white", children, ...rest },
@@ -101,11 +100,6 @@ export const ScrollRow = forwardRef<HTMLDivElement, Props>(function ScrollRow(
     }
   };
 
-  const nudge = (dir: -1 | 1) => inner.current?.scrollBy({ left: dir * Math.max(120, inner.current.clientWidth * 0.6), behavior: "smooth" });
-
-  const arrow =
-    "absolute top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white border-2 border-[#0b1020] flex items-center justify-center shadow-[2px_2px_0_#0b1020] hover:bg-yellow-200 transition-opacity";
-
   return (
     <div className={cn("relative", wrapperClassName)}>
       <div
@@ -129,24 +123,6 @@ export const ScrollRow = forwardRef<HTMLDivElement, Props>(function ScrollRow(
         aria-hidden
         className={cn("pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l to-transparent transition-opacity", fade, edge.right ? "opacity-100" : "opacity-0")}
       />
-      <button
-        type="button"
-        tabIndex={-1}
-        aria-label="Scroll left"
-        onClick={() => nudge(-1)}
-        className={cn(arrow, "left-0", edge.left ? "opacity-100" : "opacity-0 pointer-events-none")}
-      >
-        <ChevronLeft className="w-4 h-4" />
-      </button>
-      <button
-        type="button"
-        tabIndex={-1}
-        aria-label="Scroll right"
-        onClick={() => nudge(1)}
-        className={cn(arrow, "right-0", edge.right ? "opacity-100" : "opacity-0 pointer-events-none")}
-      >
-        <ChevronRight className="w-4 h-4" />
-      </button>
     </div>
   );
 });
