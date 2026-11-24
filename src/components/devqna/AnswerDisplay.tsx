@@ -306,7 +306,7 @@ export function AnswerDisplay({
       ) : (
         <>
           {/* read the question and answer aloud */}
-          <ListenControls key={question.id} title={question.question} answer={question.answer} className="mt-4" />
+          <ListenControls key={question.id} id={question.id} title={question.question} answer={question.answer} className="mt-4" />
 
           <section className="mt-10 text-base md:text-lg leading-relaxed text-slate-700">
             <Markdown text={question.answer} />
