@@ -10,25 +10,8 @@ const NEXT_REWRITES = nextAnswers as Record<string, Rewrite>;
 const REACT_REWRITES = reactAnswers as Record<string, Rewrite>;
 const HTML_CSS_REWRITES = htmlCssAnswers as Record<string, Rewrite>;
 
-export type Topic = 'nextjs' | 'react' | 'javascript' | 'html-css' | 'react-hooks';
-export type Difficulty = 'Easy' | 'Medium' | 'Hard';
-
-export interface Question {
-  id: string;
-  topic: Topic;
-  difficulty: Difficulty;
-  question: string;
-  answer: string;
-  code?: string;
-}
-
-export const TOPICS = [
-  { id: 'nextjs', label: 'Next.js', icon: 'zap' },
-  { id: 'react', label: 'React', icon: 'atom' },
-  { id: 'javascript', label: 'JavaScript', icon: 'code-2' },
-  { id: 'html-css', label: 'HTML/CSS', icon: 'layout' },
-  { id: 'react-hooks', label: 'React Hooks', icon: 'anchor' },
-];
+import type { Difficulty, Question } from "./topics";
+export { TOPICS, type Topic, type Difficulty, type Question } from "./topics";
 
 function getDifficulty(i: number): Difficulty {
   if (i % 3 === 0) return 'Hard';

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Topic, TOPICS } from "@/lib/questions";
+import { TOPICS, type Topic } from "@/lib/topics";
 import { cn } from "@/lib/utils";
 import { ScrollRow } from "@/components/ui/ScrollRow";
 

@@ -1,6 +1,9 @@
 'use server';
 
 import { withFallback } from '@/lib/groq';
+import { allow } from '@/lib/rate-limit';
+import { speechTextFor } from '@/lib/speech-text';
+import { ALL_QUESTIONS } from '@/lib/questions';
 
 /**
  * Translates an answer (already converted to plain spoken text) into natural,
@@ -9,21 +12,31 @@ import { withFallback } from '@/lib/groq';
  */
 
 const MAX_INPUT = 6000; // characters; answers are ~1,500 on average
-const cache = new Map<string, string>(); // per server instance; answers rarely change
+// keyed by question id, so it holds at most one entry per question
+const cache = new Map<string, string>();
+const BY_ID = new Map(ALL_QUESTIONS.map((q) => [q.id, q]));
 
 export interface TranslateForSpeechResult {
   ok: boolean;
   text?: string;
-  error?: 'unavailable' | 'failed';
+  error?: 'unavailable' | 'failed' | 'busy';
 }
 
-export async function translateForSpeech(input: { key: string; text: string }): Promise<TranslateForSpeechResult> {
-  const text = input.text.slice(0, MAX_INPUT).trim();
-  if (!text) return { ok: false, error: 'failed' };
+/**
+ * Takes only a question id: the text is rebuilt on the server, so this action can't be used to
+ * translate arbitrary text with our Groq keys.
+ */
+export async function translateForSpeech(input: { id: string }): Promise<TranslateForSpeechResult> {
+  const q = typeof input?.id === 'string' ? BY_ID.get(input.id) : undefined;
+  if (!q) return { ok: false, error: 'failed' };
 
-  const cacheKey = `${input.key}:${text.length}`;
-  const hit = cache.get(cacheKey);
+  const hit = cache.get(q.id);
   if (hit) return { ok: true, text: hit };
+
+  if (!(await allow('translate', 6, 60_000)) || !(await allow('translate-hour', 40, 3_600_000))) {
+    return { ok: false, error: 'busy' };
+  }
+  const text = speechTextFor(q.question, q.answer).slice(0, MAX_INPUT);
 
   if (!process.env.GROQ_API_KEY_1 && !process.env.GROQ_API_KEY_2 && !process.env.GROQ_API_KEY_3) {
     return { ok: false, error: 'unavailable' };
@@ -53,7 +66,7 @@ export async function translateForSpeech(input: { key: string; text: string }): 
       return res.choices[0]?.message?.content?.trim();
     });
     if (!out) return { ok: false, error: 'failed' };
-    cache.set(cacheKey, out);
+    cache.set(q.id, out);
     return { ok: true, text: out };
   } catch (e) {
     console.error('Hindi translation failed:', e);

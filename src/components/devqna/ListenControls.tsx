@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Languages, Loader2, Pause, Play, Square, Volume2 } from "lucide-react";
 import { translateForSpeech } from "@/ai/flows/translate-for-speech";
 import { translateBuiltIn } from "@/lib/translate-builtin";
+import { speechTextFor } from "@/lib/speech-text";
 import { cn } from "@/lib/utils";
 
 const RATES = [0.85, 1, 1.25, 1.5] as const;
@@ -13,60 +14,6 @@ const HI_CACHE = "devqna-tts-hi:"; // + question id (bump the prefix if the tran
 /** Chrome cuts off long utterances, so speech is queued as short chunks. */
 const MAX_CHUNK = 220;
 
-/** Code symbols read aloud as words, so "a => b" is not spoken as "equals greater than". */
-const SYMBOLS: [RegExp, string][] = [
-  [/===/g, " strictly equals "],
-  [/!==/g, " is not strictly equal to "],
-  [/=>/g, " arrow "],
-  [/&&/g, " and "],
-  [/\|\|/g, " or "],
-  [/\?\?/g, " nullish coalescing "],
-  [/\.\.\./g, " spread "],
-  [/->/g, " to "],
-  [/→/g, " to "],
-  [/≈/g, " about "],
-  [/\s[<]=\s/g, " less than or equal to "],
-  [/\s[>]=\s/g, " greater than or equal to "],
-];
-
-/** Turns an answer's Markdown into plain sentences that sound natural when spoken. */
-export function markdownToSpeech(md: string): string {
-  let t = md.replace(/\r\n/g, "\n");
-  // fenced code blocks are described, not read character by character
-  t = t.replace(/```[\s\S]*?```/g, "\n(There is a code example on screen.)\n");
-  // tables: read each row as a list of cells, skip the separator row
-  t = t.replace(/^[ \t]*\|?[ \t]*:?-{2,}.*$/gm, "");
-  t = t.replace(/^[ \t]*\|(.+)\|[ \t]*$/gm, (_, row: string) =>
-    row
-      .split("|")
-      .map((c) => c.trim())
-      .filter(Boolean)
-      .join(", ") + "."
-  );
-  t = t
-    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1") // images -> alt text
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1") // links -> link text
-    .replace(/`([^`]+)`/g, "$1") // inline code -> its text
-    .replace(/<\/?[a-z][^>]*>/gi, (tag) => tag.replace(/[<>/]/g, " ")) // <div> -> " div "
-    .replace(/(\*\*|\*|~~)(?=\S)([\s\S]*?\S)\1/g, "$2") // bold / italic / strike (not "_", which appears in identifiers)
-    .replace(/(^|\s)__?(\S[^_]*\S)__?(?=\s|[.,;:!?]|$)/g, "$1$2"); // _italic_ / __bold__ only at word edges
-  // headings and list items become sentences so the voice pauses between them
-  t = t
-    .split("\n")
-    .map((line) => {
-      const l = line
-        .replace(/^\s{0,3}#{1,6}\s+/, "")
-        .replace(/^\s*(?:[-*+]|\d+[.)])\s+/, "")
-        .replace(/^\s*>\s?/, "")
-        .trim();
-      if (!l) return "";
-      return /[.!?:;,)]$/.test(l) ? l : `${l}.`;
-    })
-    .filter(Boolean)
-    .join(" ");
-  for (const [re, word] of SYMBOLS) t = t.replace(re, word);
-  return t.replace(/\s+/g, " ").replace(/\s+([.,;:!?])(?=\s|$)/g, "$1").trim();
-}
 
 function chunk(text: string): string[] {
   // "।" (danda) ends Hindi sentences
@@ -129,7 +76,7 @@ export function ListenControls({
   /** one-time language-pack download for the on-device translator (0–1) */
   const [download, setDownload] = useState<number | null>(null);
 
-  const english = useMemo(() => `${title.replace(/[?]?$/, "?")} ${markdownToSpeech(answer)}`, [title, answer]);
+  const english = useMemo(() => speechTextFor(title, answer), [title, answer]);
   const chunks = useMemo(() => chunk(lang === "hi" ? hindi ?? "" : english), [lang, hindi, english]);
 
   const idx = useRef(0);
@@ -229,9 +176,9 @@ export function ListenControls({
 
     let text = await translateBuiltIn(english, "hi", (loaded) => setDownload(loaded));
     setDownload(null);
-    let failure: "unavailable" | "failed" | undefined;
+    let failure: "unavailable" | "failed" | "busy" | undefined;
     if (!text && playWhenReady.current) {
-      const res = await translateForSpeech({ key: id, text: english });
+      const res = await translateForSpeech({ id });
       text = res.ok && res.text ? res.text : null;
       failure = res.error;
     }
@@ -248,7 +195,9 @@ export function ListenControls({
       setNotice(
         failure === "unavailable"
           ? "Hindi translation isn't available in this browser. It works for free in Chrome or Edge on desktop, and everywhere once the site's AI key is set up. English works now."
-          : "Could not translate this answer right now. Please try again in a moment."
+          : failure === "busy"
+            ? "You've translated a lot of answers in a short time. Please wait a minute and try again."
+            : "Could not translate this answer right now. Please try again in a moment."
       );
     }
   }, [id, english]);

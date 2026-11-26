@@ -18,7 +18,7 @@ import {
   Sparkles,
   Timer,
 } from "lucide-react";
-import { Question, TOPICS } from "@/lib/questions";
+import { TOPICS, type Question } from "@/lib/topics";
 import { generateExplanationAndExample, GenerateExplanationAndExampleOutput } from "@/ai/flows/generate-explanation-and-example";
 import { CodePanel, type CodeLang } from "@/components/devqna/CodePanel";
 import { Markdown as BaseMarkdown } from "@/components/devqna/Markdown";
@@ -52,15 +52,6 @@ const DIFF_CHIP = {
   Medium: "bg-amber-300",
   Hard: "bg-rose-400",
 } as const;
-
-const LANGUAGE_NAME: Record<string, string> = {
-  nextjs: "Next.js",
-  react: "React.js",
-  javascript: "JavaScript",
-  "html-css": "HTML/CSS",
-  "react-hooks": "React Hooks",
-};
-
 
 function detectLang(code: string, topic: string): CodeLang {
   const t = code.trimStart();
@@ -174,11 +165,7 @@ export function AnswerDisplay({
     setAi(null);
     try {
       setAi(
-        await generateExplanationAndExample({
-          concept: question.question,
-          context: question.answer,
-          programmingLanguage: LANGUAGE_NAME[question.topic] ?? "JavaScript",
-        })
+        await generateExplanationAndExample({ id: question.id })
       );
     } catch (e) {
       console.error("AI generation error:", e);
