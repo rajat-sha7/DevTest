@@ -2,6 +2,8 @@ import { execFileSync } from "node:child_process";
 import type { MetadataRoute } from "next";
 import { abs } from "@/lib/site";
 import { docData } from "@/app/docData";
+import { ALL_QUESTIONS } from "@/lib/questions";
+import { BASE, TOPIC_IDS, questionPath, topicPath } from "@/lib/question-pages";
 
 /**
  * Generated once at build time. `lastModified` is the latest git commit that
@@ -14,7 +16,14 @@ export const dynamic = "force-static";
 const SHARED = ["src/app/layout.tsx", "src/lib/site.ts", "src/lib/schema.ts"];
 const QUESTIONS = ["src/lib/questions.ts", "src/lib/answers", "content/answers"];
 
+const commitCache = new Map<string, Date | undefined>();
 function lastCommit(paths: string[]): Date | undefined {
+  const key = paths.join("|");
+  if (!commitCache.has(key)) commitCache.set(key, readLastCommit(paths)); // 700+ question pages share a few source sets
+  return commitCache.get(key);
+}
+
+function readLastCommit(paths: string[]): Date | undefined {
   try {
     const iso = execFileSync("git", ["log", "-1", "--format=%cI", "--", ...paths], {
       encoding: "utf8",
@@ -51,6 +60,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("/questions-answers", ["src/app/questions-answers", "src/components/devqna", ...QUESTIONS], 0.9, "weekly"),
     page("/coding-round", ["src/app/coding-round", "src/lib/coding-round-questions.ts", "src/lib/coding-round-content.ts"], 0.8, "monthly"),
     page("/playground", ["src/app/playground", "src/lib/playground"], 0.8, "monthly"),
+    page(BASE, ["src/app/interview-questions", "src/lib/question-pages.ts", ...QUESTIONS], 0.9, "weekly"),
+    ...TOPIC_IDS.map((t) => page(topicPath(t), ["src/app/interview-questions", "src/lib/question-pages.ts", ...QUESTIONS], 0.8, "weekly")),
+    ...ALL_QUESTIONS.map((q) =>
+      page(questionPath(q), ["src/app/interview-questions", "src/lib/question-pages.ts", "src/components/devqna/Markdown.tsx", ...QUESTIONS], 0.7, "monthly")
+    ),
     page("/about", ["src/app/about"], 0.5, "monthly"),
     page("/docbar", ["src/app/docbar", "src/app/docData.ts"], 0.5, "monthly"),
     ...Object.keys(docData).map((topic) =>

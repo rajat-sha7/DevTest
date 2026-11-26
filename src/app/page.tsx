@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ALL_QUESTIONS, TOPICS, type Question } from "@/lib/questions";
+import { ALL_QUESTIONS, TOPICS, type Question, type Topic } from "@/lib/questions";
+import { BASE, questionPath, topicPath } from "@/lib/question-pages";
 import { CODING_ROUND_QUESTIONS } from "@/lib/coding-round-questions";
 import { cleanTitle } from "@/lib/coding-round-content";
 import { LogoMark } from "@/components/Logo";
@@ -59,7 +60,8 @@ function summary(md: string, max = 150) {
 
 const byTopic = (id: string) => ALL_QUESTIONS.filter((q) => q.topic === id);
 const pick = (id: string, i: number): Question => byTopic(id)[i];
-const qHref = (q: Question) => `/questions-answers?topic=${q.topic}&q=${q.id}`;
+// question links go to the crawlable question page, which links on to the study app
+const qHref = (q: Question) => questionPath(q);
 /** The coding round lists each task once (by title), so link to the first task with that title. */
 const roundHref = (question: string) => {
   const first = CODING_ROUND_QUESTIONS.find((x) => cleanTitle(x.question) === cleanTitle(question));
@@ -467,11 +469,11 @@ export default function LandingPage() {
             </div>
 
             <nav aria-label="Topics">
-              <h3 className="text-white font-bold">Practice</h3>
+              <h3 className="text-white font-bold">Interview questions</h3>
               <ul className="mt-3 space-y-2">
                 {topics.map((t) => (
                   <li key={t.id}>
-                    <Link href={`/questions-answers?topic=${t.id}`} className="hover:text-white transition-colors">
+                    <Link href={topicPath(t.id as Topic)} className="hover:text-white transition-colors">
                       {t.label}
                     </Link>
                   </li>
@@ -482,7 +484,8 @@ export default function LandingPage() {
             <nav aria-label="Tools">
               <h3 className="text-white font-bold">Tools</h3>
               <ul className="mt-3 space-y-2">
-                <li><Link href="/questions-answers" className="hover:text-white transition-colors">All questions</Link></li>
+                <li><Link href="/questions-answers" className="hover:text-white transition-colors">Study app</Link></li>
+                <li><Link href={BASE} className="hover:text-white transition-colors">All questions</Link></li>
                 <li><Link href="/coding-round" className="hover:text-white transition-colors">Coding round</Link></li>
                 <li><Link href="/playground" className="hover:text-white transition-colors">Playground</Link></li>
                 <li><Link href="/docbar" className="hover:text-white transition-colors">Docs</Link></li>
