@@ -5,6 +5,7 @@ import { sectionTransition, type SectionMotion } from "@/lib/section-transition"
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
+  AlertCircle,
   ArrowLeft,
   ArrowRight,
   Bookmark,
@@ -16,6 +17,7 @@ import {
   Flag,
   Lightbulb,
   Link2,
+  LoaderCircle,
   Lock,
   RotateCcw,
   Search,
@@ -38,6 +40,7 @@ import { flushStudy, useStudy } from "@/hooks/useStudy";
 import { onPageLeave } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { compileProblems, detectRequirements, isUntouched, type Problem } from "@/lib/coding-round-checks";
 
 /* The data repeats each prompt with a different number; the workspace shows every distinct challenge once. */
 const CHALLENGES = CODING_ROUND_QUESTIONS.filter((q, i, a) => a.findIndex((x) => cleanTitle(x.question) === cleanTitle(q.question)) === i);
@@ -62,14 +65,6 @@ interface Session {
   submitted: boolean;
 }
 const fresh = (id: string): Session => ({ id, manual: [], hints: 0, revealed: false, submitted: false });
-
-function countMatches(src: string, pattern: string) {
-  try {
-    return (src.match(new RegExp(pattern, "gi")) || []).length;
-  } catch {
-    return 0;
-  }
-}
 
 function Workspace() {
   const params = useSearchParams();
@@ -190,22 +185,69 @@ function Workspace() {
   /* ---------- requirements: detected from your code, or ticked by hand ---------- */
   const deferred = useDeferredValue(code);
   const detected = useMemo(
-    () => content.requirements.map((r) => !!r.pattern && countMatches(deferred, r.pattern) > countMatches(content.starter, r.pattern)),
+    () => detectRequirements(deferred, content.starter, content.requirements.map((r) => r.pattern)),
     [deferred, content]
   );
   const checked = content.requirements.map((_, i) => detected[i] || sess.manual.includes(i));
   const checkedCount = checked.filter(Boolean).length;
 
+  /* ---------- compile check: runs shortly after you stop typing ---------- */
+  const [problems, setProblems] = useState<Problem[]>([]);
+  const [checking, setChecking] = useState(true);
+  const [checkFailed, setCheckFailed] = useState(false);
+  useEffect(() => {
+    let live = true;
+    setChecking(true);
+    const t = setTimeout(() => {
+      compileProblems(code)
+        .then((p) => live && (setProblems(p), setCheckFailed(false)))
+        .catch(() => live && setCheckFailed(true))
+        .finally(() => live && setChecking(false));
+    }, 350);
+    return () => {
+      live = false;
+      clearTimeout(t);
+    };
+  }, [code]);
+  const compiles = !checkFailed && problems.length === 0;
+  const untouched = isUntouched(code, content.starter);
+
+  // put the caret on a problem's line and scroll it into view
+  const jumpTo = (line: number, col = 1) => {
+    if (tab !== "code") setTab("code");
+    if (pane !== "code") setPane("code");
+    requestAnimationFrame(() => {
+      const ta = document.querySelector<HTMLTextAreaElement>('[data-vt-pane="cr-code"] textarea');
+      if (!ta) return;
+      const lines = ta.value.split("\n");
+      const at = lines.slice(0, line - 1).reduce((n, l) => n + l.length + 1, 0) + Math.min(col - 1, lines[line - 1]?.length ?? 0);
+      ta.focus({ preventScroll: true });
+      ta.setSelectionRange(at, at);
+      const box = ta.closest<HTMLElement>(".overflow-auto");
+      const lh = Math.round(fontSize * 1.7);
+      box?.scrollTo({ top: Math.max(0, (line - 1) * lh - box.clientHeight / 3), behavior: "smooth" });
+    });
+  };
+
   const toggleManual = (i: number) =>
     patch({ manual: sess.manual.includes(i) ? sess.manual.filter((x) => x !== i) : [...sess.manual, i] });
 
   /* ---------- review ---------- */
+  const wasRunning = useRef(false);
   const openReview = () => {
+    wasRunning.current = !!sw.current?.running();
     sw.current?.pause();
     setReview({ seconds: sw.current?.seconds() ?? 0 });
   };
+  // "Keep working" (or closing the dialog) picks the clock back up if it was running
+  const closeReview = () => {
+    setReview(null);
+    if (wasRunning.current) sw.current?.start();
+  };
 
+  const canNail = compiles && !untouched;
   const finish = (result: "nailed" | "needswork") => {
+    if (result === "nailed" && !canNail) return;
     const secs = review?.seconds ?? 0;
     if (result === "nailed") {
       if (!study.done.has(ch.id)) study.toggleDone(ch.id);
@@ -260,11 +302,13 @@ function Workspace() {
   };
 
   /* ---------- keyboard: one listener, always reads the latest values ---------- */
-  const latest = useRef({ go, openReview });
-  latest.current = { go, openReview };
+  const latest = useRef({ go, openReview, closeReview, review });
+  latest.current = { go, openReview, closeReview, review };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      if (e.key === "Escape" && latest.current.review) {
+        latest.current.closeReview();
+      } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setPicker((p) => !p);
       } else if (e.altKey && e.key === "ArrowRight") {
@@ -502,13 +546,39 @@ function Workspace() {
           {tab === "code" && (
             <>
               <div className="flex-1 min-h-0 overflow-auto">
-                <CodeEditor value={code} onChange={onCode} lang="ts" fontSize={fontSize} onRun={openReview} />
+                <CodeEditor value={code} onChange={onCode} lang="ts" fontSize={fontSize} errorLine={checking ? null : problems[0]?.line} onRun={openReview} />
               </div>
-              <div className="px-4 py-1.5 bg-[#161c33] border-t border-white/10 text-[11px] text-slate-400 flex flex-wrap gap-x-4">
-                <span>Ctrl/Cmd + Enter submit</span>
-                <span>Ctrl/Cmd + / comment</span>
-                <span>Tab indent</span>
-                <span>Draft saves automatically</span>
+              {/* status bar: live compile result, then shortcuts */}
+              <div className="min-h-8 px-3 py-1.5 bg-[#161c33] border-t border-white/10 text-[11px] text-slate-400 flex items-center gap-x-4 gap-y-1 flex-wrap" aria-live="polite">
+                {checkFailed ? (
+                  <span className="flex items-center gap-1.5 text-amber-300 font-semibold">
+                    <AlertCircle className="w-3.5 h-3.5" /> Could not load the compiler, checks paused
+                  </span>
+                ) : checking && problems.length === 0 ? (
+                  <span className="flex items-center gap-1.5 text-slate-400 font-semibold">
+                    <LoaderCircle className="w-3.5 h-3.5 animate-spin" /> Checking...
+                  </span>
+                ) : problems.length === 0 ? (
+                  <span className="flex items-center gap-1.5 text-emerald-300 font-semibold">
+                    <Check className="w-3.5 h-3.5" strokeWidth={3} /> Compiles
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => jumpTo(problems[0].line, problems[0].col)}
+                    title={problems.map((p) => `Line ${p.line}: ${p.message}`).join("\n")}
+                    className="min-w-0 flex items-center gap-1.5 text-pink-300 font-semibold hover:text-pink-200 text-left"
+                  >
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">
+                      {problems.length > 1 ? `${problems.length} problems · ` : ""}Line {problems[0].line}: {problems[0].message}
+                    </span>
+                  </button>
+                )}
+                <span className="ml-auto hidden md:flex gap-x-4">
+                  <span>Ctrl/Cmd + Enter submit</span>
+                  <span>Ctrl/Cmd + / comment</span>
+                  <span>Draft saves automatically</span>
+                </span>
               </div>
             </>
           )}
@@ -564,7 +634,7 @@ function Workspace() {
 
       {/* ---------------- submit / self review ---------------- */}
       {review && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" onMouseDown={(e) => e.target === e.currentTarget && setReview(null)}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" onMouseDown={(e) => e.target === e.currentTarget && closeReview()}>
           <div className="absolute inset-0 bg-[#0b1020]/60 backdrop-blur-[2px]" aria-hidden />
           <div role="dialog" aria-modal="true" aria-label="Review your attempt" className="relative w-full max-w-md rounded-2xl border-2 border-[#0b1020] bg-white p-6 shadow-[8px_8px_0_#0b1020] animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-start justify-between gap-3">
@@ -572,7 +642,7 @@ function Workspace() {
                 <h2 className="text-xl font-extrabold">How did it go?</h2>
                 <p className="text-sm text-slate-600 mt-1">Be honest. This is only for you.</p>
               </div>
-              <button onClick={() => setReview(null)} aria-label="Close" className="w-8 h-8 rounded-lg border-2 border-[#0b1020] flex items-center justify-center hover:bg-yellow-100">
+              <button onClick={closeReview} aria-label="Close" className="w-8 h-8 rounded-lg border-2 border-[#0b1020] flex items-center justify-center hover:bg-yellow-100">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -590,18 +660,66 @@ function Workspace() {
               ))}
             </dl>
 
+            {/* automatic checks */}
+            <ul className="mt-5 space-y-2 text-sm">
+              {[
+                {
+                  ok: !untouched,
+                  label: untouched ? "You have not changed the starter code yet" : "You wrote your own solution",
+                },
+                {
+                  ok: compiles,
+                  label: checkFailed
+                    ? "Could not check that your code compiles"
+                    : compiles
+                      ? "Your code compiles"
+                      : `${problems.length} syntax ${problems.length === 1 ? "problem" : "problems"}, first on line ${problems[0]?.line}`,
+                  action: !compiles && !checkFailed ? () => (closeReview(), jumpTo(problems[0].line, problems[0].col)) : undefined,
+                },
+                {
+                  ok: checkedCount === content.requirements.length,
+                  label: `${checkedCount} of ${content.requirements.length} requirements covered`,
+                  soft: true,
+                },
+              ].map((c) => (
+                <li key={c.label} className="flex items-center gap-2.5">
+                  <span
+                    className={cn(
+                      "w-5 h-5 rounded-full border-2 border-[#0b1020] flex items-center justify-center shrink-0",
+                      c.ok ? "bg-emerald-300" : c.soft ? "bg-amber-200" : "bg-pink-300"
+                    )}
+                  >
+                    {c.ok ? <Check className="w-3 h-3" strokeWidth={4} /> : <span className="text-[11px] font-extrabold leading-none">!</span>}
+                  </span>
+                  <span className="flex-1 font-semibold leading-snug">{c.label}</span>
+                  {c.action && (
+                    <button onClick={c.action} className="text-xs font-extrabold underline underline-offset-2 hover:text-[#2b4bff]">
+                      Show me
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+
             <div className="mt-6 flex flex-col gap-2.5">
-              <button onClick={() => finish("nailed")} className="h-12 rounded-xl bg-emerald-300 border-2 border-[#0b1020] font-extrabold flex items-center justify-center gap-2 shadow-[3px_3px_0_#0b1020] hover:-translate-y-0.5 transition-transform">
+              <button
+                onClick={() => finish("nailed")}
+                disabled={!canNail}
+                title={canNail ? undefined : untouched ? "Write your solution first" : "Fix the syntax problems first"}
+                className="h-12 rounded-xl bg-emerald-300 border-2 border-[#0b1020] font-extrabold flex items-center justify-center gap-2 shadow-[3px_3px_0_#0b1020] hover:-translate-y-0.5 transition-transform disabled:opacity-40 disabled:shadow-none disabled:hover:translate-y-0 disabled:cursor-not-allowed"
+              >
                 <Check className="w-5 h-5" strokeWidth={3} /> Nailed it
               </button>
               <button onClick={() => finish("needswork")} className="h-12 rounded-xl bg-pink-300 border-2 border-[#0b1020] font-extrabold flex items-center justify-center gap-2 shadow-[3px_3px_0_#0b1020] hover:-translate-y-0.5 transition-transform">
                 <Flag className="w-5 h-5" /> Needs more work
               </button>
-              <button onClick={() => setReview(null)} className="h-10 rounded-xl font-bold text-slate-600 hover:bg-slate-100">
+              <button onClick={closeReview} className="h-10 rounded-xl font-bold text-slate-600 hover:bg-slate-100">
                 Keep working
               </button>
             </div>
-            <p className="mt-3 text-xs text-slate-500">Either choice unlocks the reference solution.</p>
+            <p className="mt-3 text-xs text-slate-500">
+              {canNail ? "Either choice unlocks the reference solution." : "\"Nailed it\" unlocks once your code compiles and differs from the starter. \"Needs more work\" still unlocks the reference."}
+            </p>
           </div>
         </div>
       )}
