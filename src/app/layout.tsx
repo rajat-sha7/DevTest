@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { JsonLd } from "@/components/JsonLd";
 import { ANNOUNCE_HIDE_SCRIPT } from "@/lib/announce";
 import { Mascot } from "@/components/landing/mascot";
+import { PageTransitions } from "@/components/PageTransitions";
 import { ALL_QUESTIONS, TOPICS } from "@/lib/questions";
 import { SITE } from "@/lib/site";
 import { graph, organization, website } from "@/lib/schema";
@@ -82,6 +83,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: ANNOUNCE_HIDE_SCRIPT }} />
       </head>
       <body className="font-body bg-background text-foreground antialiased">
+        <PageTransitions />
         {children}
         <Mascot questions={mascotQuestions} />
         <Toaster />

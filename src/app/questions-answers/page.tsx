@@ -588,7 +588,7 @@ function DashboardContent() {
       {/* ---------------- main ---------------- */}
       <main className="flex-1 flex flex-col min-w-0 bg-white relative">
         <DataSafetyBanner study={study} />
-        <header className="h-14 sm:h-16 border-b-2 border-[#0b1020] flex items-center justify-between px-3 sm:px-5 gap-2 sm:gap-3 shrink-0 bg-white z-40">
+        <header data-site-header className="h-14 sm:h-16 border-b-2 border-[#0b1020] flex items-center justify-between px-3 sm:px-5 gap-2 sm:gap-3 shrink-0 bg-white z-40">
           <div className="flex items-center gap-2 min-w-0">
             <button
               onClick={() => setSidebar((s) => !s)}

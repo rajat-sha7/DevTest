@@ -209,3 +209,22 @@ html, body { overflow-x: hidden; }
 .announce-shine { animation: announce-shine 6s ease-in-out infinite; }
 .announce-dot { animation: announce-dot 1.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .announce-shine, .announce-dot { animation: none; } }
+
+/* ---- page transitions (driven by components/PageTransitions.tsx via the View Transitions API) ---- */
+/* the outgoing page eases back and fades; the incoming one rises in just behind it */
+@keyframes vt-out { to { opacity: 0; transform: scale(.985); filter: blur(1px); } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(14px) scale(.995); } }
+::view-transition-old(root) { animation: vt-out .22s cubic-bezier(.4, 0, 1, 1) both; }
+::view-transition-new(root) { animation: vt-in .42s cubic-bezier(.16, 1, .3, 1) .08s both; }
+/* page headers stay put and morph into each other instead of sliding with the content */
+[data-site-header] { view-transition-name: site-header; }
+::view-transition-group(site-header) { animation-duration: .38s; animation-timing-function: cubic-bezier(.16, 1, .3, 1); }
+::view-transition-old(site-header), ::view-transition-new(site-header) { height: 100%; object-fit: none; object-position: top; }
+
+/* slim top progress bar for every navigation */
+.nav-progress { position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 100; pointer-events: none; view-transition-name: nav-progress; }
+.nav-progress > div { height: 100%; transform-origin: left; transform: scaleX(0); opacity: 0; background: linear-gradient(90deg, #fde047, #fff 60%, #fde047); box-shadow: 0 0 10px rgb(253 224 71 / .8); }
+.nav-progress[data-state="loading"] > div { opacity: 1; animation: nav-trickle 8s cubic-bezier(.1, .7, .3, 1) both; }
+.nav-progress[data-state="done"] > div { opacity: 0; transform: scaleX(1); transition: transform .2s ease-out, opacity .3s ease .15s; }
+@keyframes nav-trickle { from { transform: scaleX(0); } 10% { transform: scaleX(.35); } to { transform: scaleX(.9); } }
+@media (prefers-reduced-motion: reduce) { .nav-progress[data-state="loading"] > div { animation: none; transform: scaleX(.6); } }

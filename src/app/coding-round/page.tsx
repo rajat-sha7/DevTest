@@ -300,7 +300,7 @@ function Workspace() {
       <DataSafetyBanner study={study} />
 
       {/* ---------------- top bar ---------------- */}
-      <header className="shrink-0 bg-[#0b1020] text-white border-b-2 border-[#0b1020]">
+      <header data-site-header className="shrink-0 bg-[#0b1020] text-white border-b-2 border-[#0b1020]">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 sm:px-4 py-2.5">
           <Link href="/" aria-label="Home" className="shrink-0 hover:-rotate-6 transition-transform">
             <LogoMark className="w-9 h-9" />

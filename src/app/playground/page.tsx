@@ -495,7 +495,7 @@ export default function Playground() {
   return (
     <div className="min-h-screen bg-[#fff8ec] text-[#0b1020] flex flex-col">
       {/* header */}
-      <header className="sticky top-0 z-30 bg-[#2b4bff] text-white border-b-2 border-[#0b1020]">
+      <header data-site-header className="sticky top-0 z-30 bg-[#2b4bff] text-white border-b-2 border-[#0b1020]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <Link href="/" aria-label="Back to home" className="p-2 -ml-2 rounded-lg hover:bg-white/15">

@@ -23,7 +23,7 @@ export default function NotFound() {
         backgroundSize: "26px 26px",
       }}
     >
-      <header className="border-b-2 border-[#0b1020]">
+      <header data-site-header className="border-b-2 border-[#0b1020]">
         <div className="max-w-6xl mx-auto px-4 sm:px-5 h-16 flex items-center">
           <Link href="/" className="font-extrabold text-xl tracking-tight flex items-center gap-2">
             <LogoMark />

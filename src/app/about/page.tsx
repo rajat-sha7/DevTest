@@ -71,7 +71,7 @@ export default function AboutPage() {
       <JsonLd data={schema} />
       <AnnouncementBar />
 
-      <header className="sticky top-0 z-20 bg-[#2b4bff]/95 backdrop-blur border-b-2 border-[#0b1020] text-white">
+      <header data-site-header className="sticky top-0 z-20 bg-[#2b4bff]/95 backdrop-blur border-b-2 border-[#0b1020] text-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-5 h-16 flex items-center justify-between">
           <Link href="/" className="font-extrabold text-xl tracking-tight flex items-center gap-2">
             <LogoMark />
