@@ -33,6 +33,7 @@ import {
 import { LogoMark } from "@/components/Logo";
 import { ScrollRow } from "@/components/ui/ScrollRow";
 import { TopicSelector } from "@/components/devqna/TopicSelector";
+import { sectionTransition, type SectionMotion } from "@/lib/section-transition";
 import { QuestionItem } from "@/components/devqna/QuestionItem";
 import { AnswerDisplay } from "@/components/devqna/AnswerDisplay";
 import { StudyOverview, type TopicStat } from "@/components/devqna/StudyOverview";
@@ -191,27 +192,31 @@ function DashboardContent() {
     return () => clearTimeout(t);
   }, [current?.id, view, sidebar, list, centerActive]);
 
-  const toTop = () => document.getElementById("main-content")?.scrollTo({ top: 0, behavior: "smooth" });
+  const toTop = () => document.getElementById("main-content")?.scrollTo({ top: 0, behavior: "instant" });
   const closeDrawer = () => window.innerWidth < 768 && setSidebar(false);
 
-  const goto = useCallback((id: string) => {
-    setSelectedId(id);
-    setView("study");
-    toTop();
-    closeDrawer();
+  const goto = useCallback((id: string, motion: SectionMotion = "swap") => {
+    sectionTransition(() => {
+      setSelectedId(id);
+      setView("study");
+      toTop();
+      closeDrawer();
+    }, motion);
   }, []);
 
   const open = useCallback((t: Topic, id: string, resetFilters = true) => {
-    setTopic(t);
-    setSelectedId(id);
-    setView("study");
-    if (resetFilters) {
-      setQuery("");
-      setDifficulty("All");
-      setStatus("all");
-    }
-    toTop();
-    closeDrawer();
+    sectionTransition(() => {
+      setTopic(t);
+      setSelectedId(id);
+      setView("study");
+      if (resetFilters) {
+        setQuery("");
+        setDifficulty("All");
+        setStatus("all");
+      }
+      toTop();
+      closeDrawer();
+    });
   }, []);
 
   /* ---------- follow links that change ?topic / ?q / ?difficulty while already on this page ---------- */
@@ -223,8 +228,10 @@ function DashboardContent() {
     if (key === lastUrl.current) return;
     lastUrl.current = key;
     const t = isTopic(urlTopic) ? urlTopic : topic;
-    if (urlQ) open(t, urlQ);
-    else if (isTopic(urlTopic)) {
+    if (urlQ) {
+      // our own replaceState below echoes back here; only act on links that actually move us
+      if (urlQ !== selectedId || t !== topic) open(t, urlQ);
+    } else if (isTopic(urlTopic)) {
       setTopic(urlTopic);
       setSelectedId(null);
       setView("study");
@@ -236,10 +243,10 @@ function DashboardContent() {
 
   const next = useCallback(() => {
     const target = pos === -1 ? list[0] : list[pos + 1];
-    if (target) goto(target.id);
+    if (target) goto(target.id, "forward");
   }, [pos, list, goto]);
   const prev = useCallback(() => {
-    if (pos > 0) goto(list[pos - 1].id);
+    if (pos > 0) goto(list[pos - 1].id, "back");
   }, [pos, list, goto]);
 
   const random = useCallback(() => {
@@ -248,6 +255,12 @@ function DashboardContent() {
     if (!from.length) return;
     goto(from[Math.floor(Math.random() * from.length)].id);
   }, [list, study.done, goto]);
+
+  // picking from the sidebar slides in the direction of the list
+  const selectQuestion = (id: string) => {
+    const i = list.findIndex((q) => q.id === id);
+    goto(id, view !== "study" || pos === -1 || i === -1 ? "swap" : i > pos ? "forward" : "back");
+  };
 
   const randomAnywhere = () => {
     const pool = ALL_QUESTIONS.filter((q) => !study.done.has(q.id));
@@ -313,7 +326,7 @@ function DashboardContent() {
           random();
           break;
         case "o":
-          setView((v) => (v === "overview" ? "study" : "overview"));
+          sectionTransition(() => setView((v) => (v === "overview" ? "study" : "overview")));
           break;
       }
     };
@@ -441,12 +454,14 @@ function DashboardContent() {
           <TopicSelector
             currentTopic={topic}
             percent={percent}
-            onTopicChange={(t) => {
-              setTopic(t);
-              setSelectedId(null);
-              setQuery("");
-              setView("study");
-            }}
+            onTopicChange={(t) =>
+              sectionTransition(() => {
+                setTopic(t);
+                setSelectedId(null);
+                setQuery("");
+                setView("study");
+              })
+            }
           />
 
           {/* current topic + progress */}
@@ -566,7 +581,7 @@ function DashboardContent() {
                   isSaved={study.saved.has(q.id)}
                   isReview={study.review.has(q.id)}
                   hasNote={!!study.notes[q.id]}
-                  onSelect={goto}
+                  onSelect={selectQuestion}
                 />
               ))}
             </div>
@@ -653,7 +668,7 @@ function DashboardContent() {
               <Shuffle className="w-4 h-4" />
             </button>
             <button
-              onClick={() => setView((v) => (v === "overview" ? "study" : "overview"))}
+              onClick={() => sectionTransition(() => setView((v) => (v === "overview" ? "study" : "overview")))}
               title="Overview (o)"
               aria-label="Overview"
               aria-pressed={view === "overview"}
@@ -672,7 +687,7 @@ function DashboardContent() {
           </div>
         </header>
 
-        <div id="main-content" className="flex-1 overflow-y-auto custom-scrollbar scroll-smooth">
+        <div id="main-content" data-vt-pane="qa-pane" className="flex-1 overflow-y-auto custom-scrollbar scroll-smooth">
           <div className="max-w-3xl mx-auto px-4 md:px-8 py-8 md:py-12">
             {view === "overview" ? (
               <StudyOverview
@@ -682,11 +697,13 @@ function DashboardContent() {
                 reviewCount={study.review.size}
                 savedCount={study.saved.size}
                 hasLast={!!study.last}
-                onOpenTopic={(id) => {
-                  setTopic(id as Topic);
-                  setSelectedId(null);
-                  setView("study");
-                }}
+                onOpenTopic={(id) =>
+                  sectionTransition(() => {
+                    setTopic(id as Topic);
+                    setSelectedId(null);
+                    setView("study");
+                  })
+                }
                 onContinue={() => study.last && isTopic(study.last.topic) && open(study.last.topic, study.last.id)}
                 onRandom={randomAnywhere}
                 onReview={() => openFiltered(study.review, "review")}

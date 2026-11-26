@@ -214,8 +214,8 @@ html, body { overflow-x: hidden; }
 /* the outgoing page eases back and fades; the incoming one rises in just behind it */
 @keyframes vt-out { to { opacity: 0; transform: scale(.985); filter: blur(1px); } }
 @keyframes vt-in { from { opacity: 0; transform: translateY(14px) scale(.995); } }
-::view-transition-old(root) { animation: vt-out .22s cubic-bezier(.4, 0, 1, 1) both; }
-::view-transition-new(root) { animation: vt-in .42s cubic-bezier(.16, 1, .3, 1) .08s both; }
+html[data-vt="page"]::view-transition-old(root) { animation: vt-out .22s cubic-bezier(.4, 0, 1, 1) both; }
+html[data-vt="page"]::view-transition-new(root) { animation: vt-in .42s cubic-bezier(.16, 1, .3, 1) .08s both; }
 /* page headers stay put and morph into each other instead of sliding with the content */
 [data-site-header] { view-transition-name: site-header; }
 ::view-transition-group(site-header) { animation-duration: .38s; animation-timing-function: cubic-bezier(.16, 1, .3, 1); }
@@ -228,3 +228,39 @@ html, body { overflow-x: hidden; }
 .nav-progress[data-state="done"] > div { opacity: 0; transform: scaleX(1); transition: transform .2s ease-out, opacity .3s ease .15s; }
 @keyframes nav-trickle { from { transform: scaleX(0); } 10% { transform: scaleX(.35); } to { transform: scaleX(.9); } }
 @media (prefers-reduced-motion: reduce) { .nav-progress[data-state="loading"] > div { animation: none; transform: scaleX(.6); } }
+
+/* ---- section transitions (lib/section-transition.ts): only the marked panes move ---- */
+/* everything outside the panes switches instantly */
+html[data-vt="forward"]::view-transition-old(root), html[data-vt="back"]::view-transition-old(root), html[data-vt="swap"]::view-transition-old(root) { animation: none; opacity: 0; }
+html[data-vt="forward"]::view-transition-new(root), html[data-vt="back"]::view-transition-new(root), html[data-vt="swap"]::view-transition-new(root) { animation: none; }
+
+@keyframes vt-slide-out-left { to { opacity: 0; transform: translateX(-32px); } }
+@keyframes vt-slide-in-right { from { opacity: 0; transform: translateX(32px); } }
+@keyframes vt-slide-out-right { to { opacity: 0; transform: translateX(32px); } }
+@keyframes vt-slide-in-left { from { opacity: 0; transform: translateX(-32px); } }
+
+/* clip each pane's animation to its own box so sliding content never spills over neighbours */
+::view-transition-group(qa-pane),
+::view-transition-group(cr-problem),
+::view-transition-group(cr-code) { overflow: clip; animation-duration: .38s; }
+::view-transition-image-pair(qa-pane),
+::view-transition-image-pair(cr-problem),
+::view-transition-image-pair(cr-code) { overflow: clip; }
+html[data-vt="forward"]::view-transition-old(qa-pane),
+html[data-vt="forward"]::view-transition-old(cr-problem),
+html[data-vt="forward"]::view-transition-old(cr-code) { animation: vt-slide-out-left .2s cubic-bezier(.4, 0, 1, 1) both; }
+html[data-vt="forward"]::view-transition-new(qa-pane),
+html[data-vt="forward"]::view-transition-new(cr-problem),
+html[data-vt="forward"]::view-transition-new(cr-code) { animation: vt-slide-in-right .38s cubic-bezier(.16, 1, .3, 1) .06s both; }
+html[data-vt="back"]::view-transition-old(qa-pane),
+html[data-vt="back"]::view-transition-old(cr-problem),
+html[data-vt="back"]::view-transition-old(cr-code) { animation: vt-slide-out-right .2s cubic-bezier(.4, 0, 1, 1) both; }
+html[data-vt="back"]::view-transition-new(qa-pane),
+html[data-vt="back"]::view-transition-new(cr-problem),
+html[data-vt="back"]::view-transition-new(cr-code) { animation: vt-slide-in-left .38s cubic-bezier(.16, 1, .3, 1) .06s both; }
+html[data-vt="swap"]::view-transition-old(qa-pane),
+html[data-vt="swap"]::view-transition-old(cr-problem),
+html[data-vt="swap"]::view-transition-old(cr-code) { animation: vt-out .2s cubic-bezier(.4, 0, 1, 1) both; }
+html[data-vt="swap"]::view-transition-new(qa-pane),
+html[data-vt="swap"]::view-transition-new(cr-problem),
+html[data-vt="swap"]::view-transition-new(cr-code) { animation: vt-in .38s cubic-bezier(.16, 1, .3, 1) .06s both; }

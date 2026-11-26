@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { sectionTransition, type SectionMotion } from "@/lib/section-transition";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -149,16 +150,18 @@ function Workspace() {
 
   /* ---------- choosing a challenge ---------- */
   const switchTo = useCallback(
-    (id: string) => {
+    (id: string, motion: SectionMotion = "swap") => {
       if (id === selectedId) return;
       commitDraft();
       started.current = false;
-      setSession(fresh(id));
-      setSelectedId(id);
-      setTab("code");
-      setPane("problem");
-      setLookFor(false);
-      setReview(null);
+      sectionTransition(() => {
+        setSession(fresh(id));
+        setSelectedId(id);
+        setTab("code");
+        setPane("problem");
+        setLookFor(false);
+        setReview(null);
+      }, motion);
     },
     [selectedId, commitDraft]
   );
@@ -181,7 +184,7 @@ function Workspace() {
 
   const go = (d: -1 | 1) => {
     const t = CHALLENGES[idx + d];
-    if (t) switchTo(t.id);
+    if (t) switchTo(t.id, d === 1 ? "forward" : "back");
   };
 
   /* ---------- requirements: detected from your code, or ticked by hand ---------- */
@@ -286,7 +289,7 @@ function Workspace() {
   const tabBtn = (t: typeof tab, label: string, icon: React.ReactNode) => (
     <button
       key={t}
-      onClick={() => setTab(t)}
+      onClick={() => t !== tab && sectionTransition(() => setTab(t), "swap", ["cr-code"])}
       aria-pressed={tab === t}
       className={cn("px-3 py-1.5 rounded-md font-code text-xs flex items-center gap-1.5 transition-colors", tab === t ? "bg-white text-[#0b1020] font-bold" : "text-slate-300 hover:text-white")}
     >
@@ -348,7 +351,7 @@ function Workspace() {
         {(["problem", "code"] as const).map((p) => (
           <button
             key={p}
-            onClick={() => setPane(p)}
+            onClick={() => p !== pane && sectionTransition(() => setPane(p))}
             aria-pressed={pane === p}
             className={cn("flex-1 h-10 rounded-xl border-2 border-[#0b1020] font-extrabold text-sm capitalize", pane === p ? "bg-[#0b1020] text-white" : "bg-white")}
           >
@@ -360,7 +363,7 @@ function Workspace() {
       {/* ---------------- workspace ---------------- */}
       <div className="flex-1 min-h-0 grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-4 p-3 lg:p-4">
         {/* problem */}
-        <section className={cn("min-h-0 overflow-y-auto custom-scrollbar rounded-2xl border-2 border-[#0b1020] bg-white p-5 md:p-6", pane === "problem" ? "block" : "hidden lg:block")}>
+        <section data-vt-pane="cr-problem" className={cn("min-h-0 overflow-y-auto custom-scrollbar rounded-2xl border-2 border-[#0b1020] bg-white p-5 md:p-6", pane === "problem" ? "block" : "hidden lg:block")}>
           <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
             <span className={cn("px-2.5 py-1 rounded-full border-2 border-[#0b1020]", TOPIC_CHIP[ch.topic])}>{ch.topic}</span>
             <span className={cn("px-2.5 py-1 rounded-full border-2 border-[#0b1020]", LEVEL_CHIP[ch.difficulty])}>{ch.difficulty}</span>
@@ -468,7 +471,7 @@ function Workspace() {
         </section>
 
         {/* editor / reference / notes */}
-        <section className={cn("min-h-0 flex-col rounded-2xl overflow-hidden border-2 border-[#0b1020] bg-[#0b1020] text-white shadow-[6px_6px_0_#2b4bff]", pane === "code" ? "flex" : "hidden lg:flex")}>
+        <section data-vt-pane="cr-code" className={cn("min-h-0 flex-col rounded-2xl overflow-hidden border-2 border-[#0b1020] bg-[#0b1020] text-white shadow-[6px_6px_0_#2b4bff]", pane === "code" ? "flex" : "hidden lg:flex")}>
           <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 bg-[#161c33] border-b border-white/10">
             <div className="flex items-center gap-1">
               {tabBtn("code", "solution.tsx", <Terminal className="w-3.5 h-3.5" />)}

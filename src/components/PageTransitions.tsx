@@ -44,6 +44,8 @@ export function PageTransitions() {
       if (!document.startViewTransition || reduce) return; // let the link navigate as usual
 
       e.preventDefault(); // next/link skips its own navigation when the click was prevented
+      const html = document.documentElement;
+      html.dataset.vt = "page";
       const vt = document.startViewTransition(
         () =>
           new Promise<void>((resolve) => {
@@ -56,7 +58,9 @@ export function PageTransitions() {
       const t = setTimeout(() => vt.skipTransition(), 800);
       vt.updateCallbackDone.finally(() => clearTimeout(t)).catch(() => {});
       vt.ready.catch(() => {});
-      vt.finished.catch(() => {});
+      vt.finished.finally(() => {
+        if (html.dataset.vt === "page") delete html.dataset.vt;
+      }).catch(() => {});
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
