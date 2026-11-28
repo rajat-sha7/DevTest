@@ -40,10 +40,13 @@ export const metadata: Metadata = {
   },
   formatDetection: { telephone: false, email: false, address: false },
   appleWebApp: { capable: true, title: SITE.name, statusBarStyle: "default" },
-  ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+  ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ||
+  process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION ||
+  process.env.NEXT_PUBLIC_YANDEX_SITE_VERIFICATION
     ? {
         verification: {
           ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } : {}),
+          ...(process.env.NEXT_PUBLIC_YANDEX_SITE_VERIFICATION ? { yandex: process.env.NEXT_PUBLIC_YANDEX_SITE_VERIFICATION } : {}),
           ...(process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
             ? { other: { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION } }
             : {}),
