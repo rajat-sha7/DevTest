@@ -1,4 +1,4 @@
-# Firebase App Hosting configuration for DevQnA (https://devqna.online).
+# Firebase App Hosting configuration for DevQnA (https://www.devqna.online).
 # https://firebase.google.com/docs/app-hosting/configure
 
 runConfig:
@@ -9,7 +9,7 @@ runConfig:
 env:
   # Canonical URLs, sitemap, robots.txt, structured data and social cards.
   - variable: NEXT_PUBLIC_SITE_URL
-    value: https://devqna.online
+    value: https://www.devqna.online
     availability:
       - BUILD
       - RUNTIME

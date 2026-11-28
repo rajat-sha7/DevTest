@@ -6,7 +6,7 @@ import { cleanTitle } from "@/lib/coding-round-content";
 import { LogoMark } from "@/components/Logo";
 import { JsonLd } from "@/components/JsonLd";
 import { AnnouncementBar } from "@/components/AnnouncementBar";
-import { SITE, abs } from "@/lib/site";
+import { SITE, SITE_HOST, abs } from "@/lib/site";
 import { freeOffer, graph, ids, ogImage, webPage } from "@/lib/schema";
 import { Hero3D } from "@/components/landing/hero3d";
 import { CountUp, HeroCarousel, Marquee, Reveal, type HeroItem } from "@/components/landing/motion";
@@ -514,7 +514,7 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
-            <span>© {new Date().getFullYear()} DevQnA · devqna.online</span>
+            <span>© {new Date().getFullYear()} DevQnA · {SITE_HOST}</span>
             <a href="#top" className="group inline-flex items-center gap-1.5 font-semibold text-slate-300 hover:text-white">
               Back to top <span className="inline-block transition-transform group-hover:-translate-y-0.5" aria-hidden>↑</span>
             </a>

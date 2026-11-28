@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { LogoMark } from "@/components/Logo";
 import { JsonLd } from "@/components/JsonLd";
 import { AnnouncementBar } from "@/components/AnnouncementBar";
-import { SITE, socialMeta } from "@/lib/site";
+import { SITE, SITE_HOST, socialMeta } from "@/lib/site";
 import { breadcrumb, graph, ids, webPage } from "@/lib/schema";
 import { ALL_QUESTIONS, TOPICS } from "@/lib/questions";
 import { CODING_ROUND_QUESTIONS } from "@/lib/coding-round-questions";
@@ -196,7 +196,7 @@ export default function AboutPage() {
 
       <footer className="bg-[#0b1020] text-slate-400">
         <div className="max-w-6xl mx-auto px-4 sm:px-5 py-8 flex flex-col sm:flex-row sm:justify-between gap-3 text-sm">
-          <span>© {new Date().getFullYear()} {SITE.name} · devqna.online</span>
+          <span>© {new Date().getFullYear()} {SITE.name} · {SITE_HOST}</span>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             <Link href="/" className="hover:text-white">Home</Link>
             <Link href="/questions-answers" className="hover:text-white">Questions</Link>

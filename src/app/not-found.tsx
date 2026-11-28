@@ -6,6 +6,8 @@ import { NotFoundPath } from "@/components/NotFoundPath";
 export const metadata: Metadata = {
   title: "Page not found",
   robots: { index: false, follow: true },
+  // a 404 must not inherit the root layout's canonical ("/")
+  alternates: { canonical: null },
 };
 
 const links = [
